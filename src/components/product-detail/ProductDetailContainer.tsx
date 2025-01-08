@@ -41,18 +41,25 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
       return;
     }
 
-    const maxAllowed = getAvailableStockForSize(product, selectedSize);
-    const finalQuantity = Math.min(Math.max(1, newQuantity), maxAllowed);
+    const availableStock = getAvailableStockForSize(product, selectedSize);
+    console.log(`Available stock for size ${selectedSize}: ${availableStock}`);
     
-    if (finalQuantity !== newQuantity) {
+    if (newQuantity > availableStock) {
       toast({
-        title: "Quantité ajustée",
-        description: `Stock disponible pour la taille ${selectedSize}: ${maxAllowed}`,
+        title: "Quantité non disponible",
+        description: `Stock disponible pour la taille ${selectedSize}: ${availableStock}`,
         duration: 3000,
       });
+      setQuantity(availableStock);
+      return;
     }
-    
-    setQuantity(finalQuantity);
+
+    if (newQuantity < 1) {
+      setQuantity(1);
+      return;
+    }
+
+    setQuantity(newQuantity);
   };
 
   const handleAddToCart = (withBox?: boolean) => {
@@ -147,7 +154,7 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
                   key={size}
                   onClick={() => {
                     setSelectedSize(size);
-                    setQuantity(1); // Reset quantity when size changes
+                    setQuantity(1);
                   }}
                   disabled={stock === 0}
                   className={`py-2 text-sm font-medium rounded-md transition-all duration-200
@@ -182,7 +189,7 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
               <button
                 onClick={() => handleQuantityChange(quantity + 1)}
                 className="p-1 rounded-md text-black text-lg"
-                disabled={!selectedSize || quantity >= getAvailableStockForSize(product, selectedSize)}
+                disabled={!selectedSize}
               >
                 +
               </button>
