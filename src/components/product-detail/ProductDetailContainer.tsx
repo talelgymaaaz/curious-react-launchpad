@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingBag } from 'lucide-react';
 import BoxSelectionDialog from './BoxSelectionDialog';
 import { getAvailableStockForSize } from '@/utils/stockValidation';
+import GiftBoxSelection from './GiftBoxSelection';
 
 interface ProductDetailContainerProps {
   product: Product;
@@ -111,6 +112,13 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
     }
   };
 
+  // Filter out sizes with 0 quantity
+  const availableSizes = product.sizes ? 
+    Object.entries(product.sizes)
+      .filter(([_, stock]) => stock > 0)
+      .map(([size]) => size.toUpperCase()) 
+    : [];
+
   return (
     <div className="grid lg:grid-cols-2 gap-12">
       <div className="relative">
@@ -149,24 +157,20 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
               </button>
             </div>
             <div className="grid grid-cols-7 gap-1">
-              {product.sizes && Object.entries(product.sizes).map(([size, stock]) => (
+              {availableSizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => {
-                    setSelectedSize(size.toUpperCase());
+                    setSelectedSize(size);
                     setQuantity(1);
                   }}
-                  disabled={stock === 0}
                   className={`py-2 text-sm font-medium rounded-md transition-all duration-200
-                    ${selectedSize === size.toUpperCase()
+                    ${selectedSize === size
                       ? 'bg-[#700100] text-white shadow-md transform scale-105' 
                       : 'bg-white border border-gray-200 text-gray-900 hover:border-[#700100] hover:bg-gray-50'
-                    }
-                    ${stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}
-                  `}
+                    }`}
                 >
-                  {size.toUpperCase()}
-                  <span className="block text-xs">{stock}</span>
+                  {size}
                 </button>
               ))}
             </div>
@@ -195,6 +199,13 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
               </button>
             </div>
           </div>
+
+          {product.itemgroup_product === 'chemises' && (
+            <GiftBoxSelection 
+              selectedBoxOption={selectedBoxOption}
+              setSelectedBoxOption={setSelectedBoxOption}
+            />
+          )}
 
           <Button
             onClick={handleInitialAddToCart}
