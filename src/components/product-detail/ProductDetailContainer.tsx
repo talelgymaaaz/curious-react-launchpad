@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '@/types/product';
 import { useCart } from '@/components/cart/CartProvider';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import ProductImageCarousel from './ProductImageCarousel';
 import ProductInfo from './ProductInfo';
 import { Heart } from 'lucide-react';
@@ -153,12 +153,12 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
                 <button
                   key={size}
                   onClick={() => {
-                    setSelectedSize(size);
+                    setSelectedSize(size.toUpperCase());
                     setQuantity(1);
                   }}
                   disabled={stock === 0}
                   className={`py-2 text-sm font-medium rounded-md transition-all duration-200
-                    ${selectedSize === size 
+                    ${selectedSize === size.toUpperCase()
                       ? 'bg-[#700100] text-white shadow-md transform scale-105' 
                       : 'bg-white border border-gray-200 text-gray-900 hover:border-[#700100] hover:bg-gray-50'
                     }
