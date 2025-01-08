@@ -22,6 +22,7 @@ import { savePersonalization, getPersonalizations } from '@/utils/personalizatio
 import MainNavbarProductDetails from '@/components/MainNavbarProductDetails';
 import BoxSelectionDialog from '@/components/product-detail/BoxSelectionDialog';
 import BoxInfoTooltip from '@/components/product-detail/BoxInfoTooltip';
+import { getAvailableStockForSize, getTotalStock } from '@/utils/stockValidation';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -40,65 +41,34 @@ const ProductDetailPage = () => {
   });
 
   const product = products?.find(p => p.id === Number(id));
-  const relatedProducts = products?.filter(p => 
-    p.id !== Number(id) && p.relatedProducts === product?.relatedProducts
-  ).slice(0, 4);
 
-  const availableSizes = product ? Object.entries(product.sizes)
-    .filter(([_, quantity]) => quantity > 0)
-    .map(([size]) => size.toUpperCase())
-    : [];
+  // Get available stock for selected size
+  const availableStockForSize = selectedSize ? getAvailableStockForSize(product, selectedSize) : 0;
+  const totalStock = product ? getTotalStock(product) : 0;
 
-  const handleAddToCart = (withBox?: boolean) => {
+  // Modified quantity setter to respect size stock limits
+  const handleQuantityChange = (newQuantity: number) => {
     if (!selectedSize) {
       toast({
         title: "Veuillez sélectionner une taille",
-        description: "Une taille doit être sélectionnée avant d'ajouter au panier",
+        description: "Une taille doit être sélectionnée avant de modifier la quantité",
         variant: "destructive",
       });
       return;
     }
 
-    const trimmedText = personalizationText?.trim() || '';
-    if (trimmedText) {
-      savePersonalization(product!.id, trimmedText);
+    const maxAllowed = availableStockForSize;
+    const finalQuantity = Math.min(Math.max(1, newQuantity), maxAllowed);
+    
+    if (finalQuantity !== newQuantity) {
+      toast({
+        title: "Quantité ajustée",
+        description: `Stock disponible pour la taille ${selectedSize}: ${maxAllowed}`,
+        duration: 3000,
+      });
     }
-
-    const itemName = withBox ? `${product!.name} [+ Box]` : product!.name;
-
-    addToCart({
-      id: product!.id,
-      name: itemName,
-      price: product!.price,
-      quantity: quantity,
-      image: product!.image,
-      size: selectedSize,
-      color: product!.colorProduct,
-      personalization: trimmedText,
-      withBox: withBox
-    });
-
-    toast({
-      title: "Produit ajouté au panier",
-      description: `${quantity}x ${itemName} (${selectedSize}) ajouté avec succès`,
-      style: {
-        backgroundColor: '#700100',
-        color: 'white',
-        border: '1px solid #590000',
-      },
-    });
-  };
-
-  const handleInitialAddToCart = () => {
-    if (product?.itemgroup_product === 'chemises') {
-      if (selectedBoxOption !== null) {
-        handleAddToCart(selectedBoxOption);
-      } else {
-        setIsBoxDialogOpen(true);
-      }
-    } else {
-      handleAddToCart(false);
-    }
+    
+    setQuantity(finalQuantity);
   };
 
   if (isLoading) {
@@ -174,14 +144,14 @@ const ProductDetailPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-base font-semibold text-gray-900">
-                      Taille {selectedSize ? `sélectionnée: ${selectedSize}` : ''}
+                      Taille {selectedSize ? `sélectionnée: ${selectedSize} (Stock: ${availableStockForSize})` : ''}
                     </span>
                     <button className="text-xs text-[#700100] hover:underline">
                       Guide des tailles
                     </button>
                   </div>
                   <div className="grid grid-cols-7 gap-1">
-                    {availableSizes.map((size) => (
+                    {product.sizes && Object.keys(product.sizes).map(size => (
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
@@ -191,32 +161,35 @@ const ProductDetailPage = () => {
                             : 'bg-white border border-gray-200 text-gray-900 hover:border-[#700100] hover:bg-gray-50'
                           }`}
                       >
-                        {size}
+                        {size.toUpperCase()}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-  <span className="text-base font-semibold text-gray-900">Quantité</span>
-  <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 w-fit">
-    <button
-      onClick={() => setQuantity(q => Math.max(1, q - 1))}
-      className="p-1 rounded-md text-black text-lg"
-      style={{ fontSize: 40 }} // Increase font size by 20%
-    >
-      -
-    </button>
-    <span className="w-8 text-center font-medium text-gray-900">{quantity}</span>
-    <button
-      onClick={() => setQuantity(q => q + 1)}
-      className="p-1 rounded-md text-black text-lg"
-      style={{ fontSize: 40 }} // Increase font size by 20%
-    >
-      +
-    </button>
-  </div>
-</div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-base font-semibold text-gray-900">Quantité</span>
+                    <span className="text-sm text-gray-600">Stock total: {totalStock}</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 w-fit">
+                    <button
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      className="p-1 rounded-md text-black text-lg"
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center font-medium text-gray-900">{quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      className="p-1 rounded-md text-black text-lg"
+                      disabled={!selectedSize || quantity >= availableStockForSize}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
 
                 {product.itemgroup_product === 'chemises' && (
                   <div className="space-y-2">
