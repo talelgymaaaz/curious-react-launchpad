@@ -51,10 +51,35 @@ interface OrderSubmission {
   order_status: OrderStatus;
 }
 
+const sendOrderConfirmationEmail = async (orderData: OrderSubmission): Promise<void> => {
+  console.log('Sending order confirmation email...');
+  
+  try {
+    const response = await fetch('https://fioriforyou.com/testsmtp.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Email API error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Email confirmation sent successfully:', result);
+  } catch (error) {
+    console.error('Error sending confirmation email:', error);
+    throw error;
+  }
+};
+
 export const submitOrder = async (orderData: OrderSubmission): Promise<any> => {
   console.log('Submitting order with data:', orderData);
 
   try {
+    // First submit the order
     const response = await fetch('https://respizenmedical.com/fiori/submit_all_order.php', {
       method: 'POST',
       headers: {
@@ -70,9 +95,13 @@ export const submitOrder = async (orderData: OrderSubmission): Promise<any> => {
 
     const result = await response.json();
     console.log('Order submission successful:', result);
+
+    // If order submission is successful, send confirmation email
+    await sendOrderConfirmationEmail(orderData);
+
     return result;
   } catch (error) {
-    console.error('Error submitting order:', error);
+    console.error('Error in order process:', error);
     throw error;
   }
 };
