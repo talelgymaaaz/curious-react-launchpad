@@ -52,26 +52,30 @@ interface OrderSubmission {
 }
 
 const sendOrderConfirmationEmail = async (orderData: OrderSubmission): Promise<void> => {
-  console.log('Sending order confirmation email...');
+  console.log('Sending order confirmation email with data:', orderData);
   
   try {
     const response = await fetch('https://fioriforyou.com/testsmtp.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
+      mode: 'cors',
       body: JSON.stringify(orderData),
     });
 
     if (!response.ok) {
-      throw new Error(`Email API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Email API error response:', errorText);
+      throw new Error(`Email API error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('Email confirmation sent successfully:', result);
+    console.log('Email confirmation response:', result);
   } catch (error) {
     console.error('Error sending confirmation email:', error);
-    throw error;
+    throw new Error(`Failed to send confirmation email: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -80,26 +84,35 @@ export const submitOrder = async (orderData: OrderSubmission): Promise<any> => {
 
   try {
     // First submit the order
-    const response = await fetch('https://respizenmedical.com/fiori/submit_all_order.php', {
+    const orderResponse = await fetch('https://respizenmedical.com/fiori/submit_all_order.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
+      mode: 'cors',
       body: JSON.stringify(orderData),
     });
 
-    if (!response.ok) {
-      console.error('Server responded with status:', response.status);
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (!orderResponse.ok) {
+      const errorText = await orderResponse.text();
+      console.error('Order submission error response:', errorText);
+      throw new Error(`Order submission failed: ${orderResponse.status} - ${errorText}`);
     }
 
-    const result = await response.json();
-    console.log('Order submission successful:', result);
+    const orderResult = await orderResponse.json();
+    console.log('Order submission successful:', orderResult);
 
     // If order submission is successful, send confirmation email
-    await sendOrderConfirmationEmail(orderData);
+    try {
+      await sendOrderConfirmationEmail(orderData);
+      console.log('Email confirmation sent successfully');
+    } catch (emailError) {
+      // Log email error but don't fail the order submission
+      console.error('Email confirmation failed but order was submitted:', emailError);
+    }
 
-    return result;
+    return orderResult;
   } catch (error) {
     console.error('Error in order process:', error);
     throw error;
