@@ -182,22 +182,23 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
               <span className="text-sm text-gray-600">Stock total: {product.quantity}</span>
             </div>
             <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 w-fit">
-              <button
-                onClick={() => handleQuantityChange(quantity - 1)}
-                className="p-1 rounded-md text-black text-lg"
-                disabled={quantity <= 1}
-              >
-                -
-              </button>
-              <span className="w-8 text-center font-medium text-gray-900">{quantity}</span>
-              <button
-                onClick={() => handleQuantityChange(quantity + 1)}
-                className="p-1 rounded-md text-black text-lg"
-                disabled={!selectedSize}
-              >
-                +
-              </button>
-            </div>
+  <button
+    onClick={() => handleQuantityChange(quantity - 1)}
+    className="p-1 rounded-md text-black text-[38px]"
+    disabled={quantity <= 1}
+  >
+    -
+  </button>
+  <span className="w-8 text-center font-medium text-gray-900">{quantity}</span>
+  <button
+    onClick={() => handleQuantityChange(quantity + 1)}
+    className="p-1 rounded-md text-black text-[38px]"
+    disabled={!selectedSize}
+  >
+    +
+  </button>
+</div>
+
           </div>
 
           {product.itemgroup_product === 'chemises' && (
