@@ -6,7 +6,7 @@ export const getAvailableStockForSize = (product: any, size: string): number => 
     'L': 'l_size',
     'XL': 'xl_size',
     'XXL': 'xxl_size',
-    'XXL2': 'xxl2_size'
+    '3XL': '3xl_size'
   };
 
   // Get the property name for the size (e.g., 'm_size' for size 'M')

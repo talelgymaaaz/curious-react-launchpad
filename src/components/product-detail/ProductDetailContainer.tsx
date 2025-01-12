@@ -90,7 +90,7 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
       quantity: quantity,
       image: product.image,
       size: selectedSize,
-      personalization: personalizationText,
+      personalization: product.category_product === "homme" && product.itemgroup_product === "costumes" ? "" : personalizationText,
       withBox: withBox,
     });
 
@@ -112,12 +112,13 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
     }
   };
 
-  // Filter out sizes with 0 quantity
   const availableSizes = product.sizes ? 
     Object.entries(product.sizes)
       .filter(([_, stock]) => stock > 0)
       .map(([size]) => size.toUpperCase()) 
     : [];
+
+  const showPersonalization = !(product.category_product === "homme" && product.itemgroup_product === "costumes");
 
   return (
     <div className="grid lg:grid-cols-2 gap-12">
@@ -138,12 +139,15 @@ const ProductDetailContainer = ({ product }: ProductDetailContainerProps) => {
           price={product.price}
         />
 
-        <div className="mt-6">
-          <PersonalizationInput
-            itemId={product.id}
-            onUpdate={setPersonalizationText}
-          />
-        </div>
+        {showPersonalization && (
+          <div className="mt-6">
+            <PersonalizationInput
+              itemId={product.id}
+              onUpdate={setPersonalizationText}
+            />
+          </div>
+        )}
+        
         <div className="h-px bg-gray-200" />
 
         <div className="space-y-6">
