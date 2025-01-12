@@ -44,7 +44,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-white text-gray-800">
-      {/* Barre Newsletter */}
+      {/* Newsletter Bar */}
       <div className="border-y border-gray-200">
         <div className="container mx-auto px-4 py-3.5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm font-medium">Abonnez-vous aujourd'hui et obtenez 5% de réduction sur votre premier achat</p>
@@ -67,33 +67,76 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Contenu Principal du Footer */}
+      {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-8">
-          {/* Contactez-nous */}
+          {/* Contact Us */}
           <div>
             <h3 className="font-semibold text-sm mb-4">CONTACTEZ-NOUS</h3>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="inline-block">+216 29 509 840</span>
+              <li>
+                <a 
+                  href="https://wa.me/+21629509840" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:underline flex items-center gap-2 text-[#700100] text-[1.2em]"
+                >
+                  <span>+216 29 509 840</span>
+                </a>
               </li>
               <li>
-                <a href="#" className="hover:underline flex items-center gap-2">
+                <a 
+                  href="mailto:contact@fioriforyou.com" 
+                  className="hover:underline flex items-center gap-2 text-[#700100] text-[1.2em]"
+                >
                   <span>Envoyez-nous un email</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:underline flex items-center gap-2">
+                <a 
+                  href="https://wa.me/+21629509840" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:underline flex items-center gap-2 text-[#700100] text-[1.2em]"
+                >
                   <span>Chat en direct</span>
                 </a>
               </li>
             </ul>
             <p className="mt-6 mb-3 text-sm">Suivez-nous</p>
             <div className="flex gap-3">
-              <a href="#" className="hover:text-[#700100]-600"><i className="fab fa-instagram text-lg"></i></a>
-              <a href="#" className="hover:text-[#700100]-600"><i className="fab fa-facebook text-lg"></i></a>
-              <a href="#" className="hover:text-[#700100]-600"><i className="fab fa-youtube text-lg"></i></a>
-              <a href="#" className="hover:text-[#700100]-600"><i className="fab fa-tiktok text-lg"></i></a>
+              <a 
+                href="https://www.instagram.com/fioriforyou/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#700100] text-[1.2em] hover:opacity-80"
+              >
+                <i className="fab fa-instagram text-lg"></i>
+              </a>
+              <a 
+                href="https://www.facebook.com/FioriForYouMen" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#700100] text-[1.2em] hover:opacity-80"
+              >
+                <i className="fab fa-facebook text-lg"></i>
+              </a>
+              <a 
+                href="https://www.youtube.com/@fioriforyou" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#700100] text-[1.2em] hover:opacity-80"
+              >
+                <i className="fab fa-youtube text-lg"></i>
+              </a>
+              <a 
+                href="https://www.tiktok.com/@fioriforyou" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#700100] text-[1.2em] hover:opacity-80"
+              >
+                <i className="fab fa-tiktok text-lg"></i>
+              </a>
             </div>
           </div>
 
@@ -137,7 +180,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Barre du Bas */}
+        {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <p>© 2024 FioriForYou</p>
           <p className="text-xs">Fait avec ❤️ en Tunisia par <strong>Holastudie</strong></p>
