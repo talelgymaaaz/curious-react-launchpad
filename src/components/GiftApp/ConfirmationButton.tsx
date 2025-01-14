@@ -62,7 +62,7 @@ const ConfirmationButton = ({ onConfirm, disabled }: ConfirmationButtonProps) =>
         )}
         <span className="relative flex items-center justify-center gap-2">
           <Gift className="w-5 h-5" />
-          {disabled ? "Ajoutez des articles" : "Maintenez pour confirmer"}
+          {disabled ? "Ajoutez des articles" : "Confirmer le pack"}
         </span>
       </motion.button>
       {!disabled && (

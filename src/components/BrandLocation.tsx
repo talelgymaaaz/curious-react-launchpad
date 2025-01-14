@@ -90,7 +90,7 @@ const BrandLocation = () => {
           </div>
         </div>
 
-        <div className="w-[95%] flex flex-wrap gap-6 items-stretch justify-center">
+        <div className="w-[93%] flex flex-wrap gap-6 items-stretch justify-center">
           <div className="w-[47%] min-w-[300px] bg-[#591C1C] rounded-lg p-6 text-white"> {/* Adjusted from 45% to 47% */}
           <br></br>
           <br></br>

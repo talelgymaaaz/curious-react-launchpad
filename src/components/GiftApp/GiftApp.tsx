@@ -34,11 +34,13 @@ const GiftApp = () => {
     if (path.includes('packtrio')) return 'Pack Trio';
     if (path.includes('packduo')) return 'Pack Duo';
     if (path.includes('packminiduo')) return 'Pack Mini Duo';
+    if (path.includes('packchemise')) return 'Pack Chemise';
     return 'Pack Trio'; // Default
   }, [location]);
 
   // Get number of containers based on pack type
   const containerCount = React.useMemo(() => {
+    if (packType === 'Pack Chemise') return 1;
     return ['Pack Duo', 'Pack Mini Duo'].includes(packType) ? 2 : 3;
   }, [packType]);
 
@@ -59,6 +61,19 @@ const GiftApp = () => {
 
     // Validate specific pack requirements
     switch (packType) {
+      case 'Pack Chemise': {
+        const chemises = selectedItems.filter(item => item.itemgroup_product === 'chemises');
+        if (chemises.length !== 1) {
+          toast({
+            title: "Sélection invalide",
+            description: "Le Pack Chemise doit contenir exactement 1 chemise",
+            variant: "destructive",
+          });
+          return false;
+        }
+        break;
+      }
+
       case 'Pack Prestige': {
         const chemises = selectedItems.filter(item => item.itemgroup_product === 'chemises');
         const accessoiresCount = selectedItems.filter(item => item.type_product === 'Accessoires').length;
@@ -166,6 +181,8 @@ const GiftApp = () => {
         return 20;
       case 'Pack Mini Duo':
         return 0;
+      case 'Pack Chemise':
+        return 10; // Example price for Pack Chemise
       default:
         return 0;
     }
