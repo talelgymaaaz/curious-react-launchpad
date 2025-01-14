@@ -64,26 +64,27 @@ const PaymentSuccessPage = () => {
 
         // Format items with correct price calculations and pack information
         const formattedItems = pendingOrder.cartItems.flatMap((item: any) => {
-          console.log('Processing item price calculation:', {
-            id: item.id,
-            price: item.price,
-            quantity: item.quantity,
-            withBox: item.withBox,
-            discount_product: item.discount_product,
-            fromPack: item.fromPack,
-            packType: packType
-          });
+          console.log('Processing item:', item);
 
           // Calculate discounted price if applicable
           const itemPrice = item.discount_product ? 
             item.price * (1 - parseFloat(item.discount_product) / 100) : 
             item.price;
 
-          // Format item name with pack/box information
+          // Format item name with pack and personalization information
           let formattedName = item.name;
+          
+          // Add pack information if item is part of a pack
           if (packType && item.fromPack) {
             formattedName += ` (${packType})`;
           }
+          
+          // Add personalization if present
+          if (item.personalization) {
+            formattedName += ` (Personnalisation: ${item.personalization})`;
+          }
+          
+          // Add box information if selected
           if (item.withBox) {
             formattedName += ' (+Box)';
           }
@@ -114,7 +115,7 @@ const PaymentSuccessPage = () => {
               quantity: item.quantity,
               price: 30,
               total_price: 30 * item.quantity,
-              name: `Boîte cadeau pour ${item.name}`,
+              name: `Boîte cadeau pour ${item.name}${packType ? ` (${packType})` : ''}`,
               size: '-',
               color: '-',
               personalization: '-',
@@ -157,7 +158,6 @@ const PaymentSuccessPage = () => {
           }
         }
 
-        // Calculate order totals using CartProvider's calculateTotal
         const orderData = {
           order_id: pendingOrder.orderId,
           user_details: {
@@ -191,7 +191,7 @@ const PaymentSuccessPage = () => {
           }
         };
 
-        console.log('Submitting order data to API with corrected prices:', JSON.stringify(orderData, null, 2));
+        console.log('Submitting order data to API:', JSON.stringify(orderData, null, 2));
 
         const isTestMode = pendingOrder.payUrl === 'test-mode';
         
