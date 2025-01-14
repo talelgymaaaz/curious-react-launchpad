@@ -57,7 +57,7 @@ const PaymentSuccessPage = () => {
         const packType = sessionStorage.getItem('selectedPackType');
         console.log('Pack type:', packType);
 
-        // Format items with correct pack information
+        // Format items with correct pack information and size
         const formattedItems = pendingOrder.cartItems.map((item: any) => {
           console.log('Processing item:', item);
 
@@ -71,16 +71,20 @@ const PaymentSuccessPage = () => {
             item.image : 
             `https://respizenmedical.com/fiori/${item.image}`;
 
+          // Determine if item is from pack
+          const isFromPack = item.fromPack && packType;
+          const itemName = isFromPack ? `${item.name} (${packType})` : item.name;
+
           return {
             item_id: item.id.toString(),
             quantity: item.quantity,
             price: itemPrice,
             total_price: itemPrice * item.quantity,
-            name: item.name,
+            name: itemName,
             size: item.size || '-',
             color: item.color || '-',
             personalization: item.personalization || '-',
-            pack: item.fromPack ? packType : 'aucun',
+            pack: isFromPack ? packType : 'aucun',
             box: item.withBox ? 'Avec box' : 'Sans box',
             image: imageUrl
           };
