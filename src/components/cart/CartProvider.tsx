@@ -55,9 +55,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       setCartItems(itemsWithPersonalization);
     }
 
-    const isSubscribed = localStorage.getItem('newsletterSubscribed') === 'true';
-    if (isSubscribed) {
-      setHasNewsletterDiscount(true);
+    // Check if user has already used the discount with their email
+    const subscribedEmail = localStorage.getItem('subscribedEmail');
+    const usedDiscountEmails = JSON.parse(localStorage.getItem('usedDiscountEmails') || '[]');
+    
+    if (subscribedEmail && usedDiscountEmails.includes(subscribedEmail)) {
+      setHasNewsletterDiscount(false);
+      localStorage.removeItem('newsletterSubscribed');
     }
   }, []);
 
@@ -121,6 +125,24 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const applyNewsletterDiscount = () => {
+    const subscribedEmail = localStorage.getItem('subscribedEmail');
+    if (!subscribedEmail) return;
+
+    // Get array of emails that have used the discount
+    const usedDiscountEmails = JSON.parse(localStorage.getItem('usedDiscountEmails') || '[]');
+    
+    // Check if this email has already used the discount
+    if (usedDiscountEmails.includes(subscribedEmail)) {
+      console.log('Email has already used the newsletter discount');
+      setHasNewsletterDiscount(false);
+      localStorage.removeItem('newsletterSubscribed');
+      return;
+    }
+
+    // Add email to used discounts list
+    usedDiscountEmails.push(subscribedEmail);
+    localStorage.setItem('usedDiscountEmails', JSON.stringify(usedDiscountEmails));
+    
     setHasNewsletterDiscount(true);
     localStorage.setItem('newsletterSubscribed', 'true');
   };
