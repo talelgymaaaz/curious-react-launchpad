@@ -18,6 +18,7 @@ const PaymentSuccessPage = () => {
   useEffect(() => {
     const handlePaymentSuccess = async () => {
       try {
+        console.log('Starting payment success handler...');
         const pendingOrderString = sessionStorage.getItem('pendingOrder');
         if (!pendingOrderString) {
           console.error('No pending order found');
@@ -40,30 +41,24 @@ const PaymentSuccessPage = () => {
         if (!finalUserDetails) {
           const errorMessage = 'User details not found. Please complete the checkout process again.';
           console.error(errorMessage);
-          
           toast({
             title: "Error - Missing User Details",
             description: errorMessage,
             duration: Infinity,
             variant: "destructive"
           });
-          
-          setTimeout(() => {
-            navigate('/cart');
-          }, 3000);
-          
+          setTimeout(() => navigate('/cart'), 3000);
           return;
         }
 
         console.log('Retrieved user details:', finalUserDetails);
-        
         await updateProductStock(pendingOrder.cartItems);
 
-        const packType = sessionStorage.getItem('selectedPackType') || null;
+        const packType = sessionStorage.getItem('selectedPackType');
         console.log('Pack type:', packType);
 
-        // Format items with correct price calculations and pack information
-        const formattedItems = pendingOrder.cartItems.flatMap((item: any) => {
+        // Format items with correct pack information
+        const formattedItems = pendingOrder.cartItems.map((item: any) => {
           console.log('Processing item:', item);
 
           // Calculate discounted price if applicable
@@ -71,66 +66,29 @@ const PaymentSuccessPage = () => {
             item.price * (1 - parseFloat(item.discount_product) / 100) : 
             item.price;
 
-          // Format item name with pack and personalization information
-          let formattedName = item.name;
-          
-          // Add pack information if item is part of a pack
-          if (packType && item.fromPack) {
-            formattedName += ` (${packType})`;
-          }
-          
-          // Add personalization if present
-          if (item.personalization) {
-            formattedName += ` (Personnalisation: ${item.personalization})`;
-          }
-          
-          // Add box information if selected
-          if (item.withBox) {
-            formattedName += ' (+Box)';
-          }
-
           // Format image URL
           const imageUrl = item.image.startsWith('http') ? 
             item.image : 
             `https://respizenmedical.com/fiori/${item.image}`;
 
-          const items = [{
+          return {
             item_id: item.id.toString(),
             quantity: item.quantity,
             price: itemPrice,
             total_price: itemPrice * item.quantity,
-            name: formattedName,
+            name: item.name,
             size: item.size || '-',
             color: item.color || '-',
             personalization: item.personalization || '-',
-            pack: packType || 'aucun',
+            pack: item.fromPack ? packType : 'aucun',
             box: item.withBox ? 'Avec box' : 'Sans box',
             image: imageUrl
-          }];
-
-          // Add box as a separate item if selected
-          if (item.withBox) {
-            items.push({
-              item_id: `box-${item.id}-${Date.now()}`,
-              quantity: item.quantity,
-              price: 30,
-              total_price: 30 * item.quantity,
-              name: `Boîte cadeau pour ${item.name}${packType ? ` (${packType})` : ''}`,
-              size: '-',
-              color: '-',
-              personalization: '-',
-              pack: packType || 'aucun',
-              box: 'Box article',
-              image: '/BoxToSelected.png'
-            });
-          }
-
-          return items;
+          };
         });
 
         // Add pack as a separate item if it exists
         if (packType) {
-          const packPrices = {
+          const packPrices: { [key: string]: number } = {
             'Pack Prestige': 50,
             'Pack Premium': 30,
             'Pack Trio': 20,
@@ -139,7 +97,7 @@ const PaymentSuccessPage = () => {
             'Pack Chemise': 10
           };
 
-          const packPrice = packPrices[packType as keyof typeof packPrices] || 0;
+          const packPrice = packPrices[packType] || 0;
           
           if (packPrice > 0) {
             formattedItems.push({
