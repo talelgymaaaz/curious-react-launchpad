@@ -8,7 +8,7 @@ const NewCollection = () => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.preload = "auto";
-      videoRef.current.playbackRate = 1.5;
+      videoRef.current.playbackRate = 1.2;
       
       const playVideo = async () => {
         try {
