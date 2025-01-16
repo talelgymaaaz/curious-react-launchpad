@@ -26,6 +26,8 @@ const MondeFioriCollection = React.lazy(() => import('./pages/MondeFioriCollecti
 const MondeFioriDNA = React.lazy(() => import('./pages/MondeFioriDNA'));
 const SurMesurePage = React.lazy(() => import('./pages/SurMesurePage'));
 const UniversCadeauxPage = React.lazy(() => import('./pages/UniversCadeauxPage'));
+const GiftCardsPage = React.lazy(() => import('./pages/GiftCardsPage'));
+const ServicesPage = React.lazy(() => import('./pages/ServicesPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -200,6 +202,22 @@ const App = () => (
                   element={
                     <Suspense fallback={<PageLoader />}>
                       <SurMesurePage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/gift-cards" 
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <GiftCardsPage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/services" 
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <ServicesPage />
                     </Suspense>
                   } 
                 />
