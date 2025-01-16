@@ -51,10 +51,10 @@ const NewCollection = () => {
               <p className="text-sm md:text-base mt-2 text-gray-300">Découvrez nos derniers designs et notre savoir-faire exceptionnel</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 md:gap-6">
-              {/* Main large image */}
-              <div className="col-span-2">
-                <div className="aspect-[3/4] overflow-hidden">
+            <div className="flex gap-4 md:gap-6 h-[600px]">
+              {/* Main large image on the left */}
+              <div className="w-1/2 h-full">
+                <div className="h-full overflow-hidden">
                   <img
                     src="NewCollection/1.png"
                     alt="Full suit showcase"
@@ -63,20 +63,22 @@ const NewCollection = () => {
                 </div>
               </div>
               
-              {/* Two smaller images in a row */}
-              <div className="aspect-square overflow-hidden">
-                <img
-                  src="NewCollection/2.png"
-                  alt="Suit detail"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square overflow-hidden">
-                <img
-                  src="NewCollection/3.png"
-                  alt="Brand label"
-                  className="w-full h-full object-cover"
-                />
+              {/* Two smaller images stacked on the right */}
+              <div className="w-1/2 flex flex-col gap-4 h-full">
+                <div className="h-1/2 overflow-hidden">
+                  <img
+                    src="NewCollection/2.png"
+                    alt="Suit detail"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="h-1/2 overflow-hidden">
+                  <img
+                    src="NewCollection/3.png"
+                    alt="Brand label"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
             </div>
 
