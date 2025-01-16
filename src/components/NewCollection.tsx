@@ -8,7 +8,7 @@ const NewCollection = () => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.preload = "auto";
-      videoRef.current.playbackRate = 1.5; // Make video play faster
+      videoRef.current.playbackRate = 1.5;
       
       const playVideo = async () => {
         try {
@@ -27,7 +27,7 @@ const NewCollection = () => {
       <div className="w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 lg:divide-x-[3px] lg:divide-white">
           {/* Video section - shown at top on mobile, right side on desktop */}
-          <div className="block lg:hidden mb-6"> {/* Mobile video container */}
+          <div className="block lg:hidden mb-6">
             <video
               ref={videoRef}
               autoPlay
@@ -35,7 +35,7 @@ const NewCollection = () => {
               muted
               playsInline
               preload="auto"
-              className="w-full h-[345px] object-cover" // Increased height by 15% (from 300px to 345px)
+              className="w-full h-[345px] object-cover"
             >
               <source
                 src="https://www.fioriforyou.com/apis/videos/newcollection.mp4"
@@ -51,39 +51,32 @@ const NewCollection = () => {
               <p className="text-sm md:text-base mt-2 text-gray-300">Découvrez nos derniers designs et notre savoir-faire exceptionnel</p>
             </div>
 
-            <div className="flex flex-col items-center space-y-4">
-              <div className="flex space-x-2 md:space-x-4">
-                <div className="h-65 md:h-80 overflow-hidden">
-                  <img
-                    src="NewCollection/4.png"
-                    alt="Inside label"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="h-65 md:h-80 overflow-hidden">
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
+              {/* Main large image */}
+              <div className="col-span-2">
+                <div className="aspect-[3/4] overflow-hidden">
                   <img
                     src="NewCollection/1.png"
-                    alt="Suit gesture"
+                    alt="Full suit showcase"
                     className="w-full h-full object-cover"
                   />
                 </div>
               </div>
-
-              <div className="flex space-x-2 md:space-x-4">
-                <div className="h-65 md:h-80 overflow-hidden">
-                  <img
-                    src="NewCollection/4.png"
-                    alt="Inside label"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="h-65 md:h-80 overflow-hidden">
-                  <img
-                    src="NewCollection/1.png"
-                    alt="Suit gesture"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+              
+              {/* Two smaller images in a row */}
+              <div className="aspect-square overflow-hidden">
+                <img
+                  src="NewCollection/2.png"
+                  alt="Suit detail"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square overflow-hidden">
+                <img
+                  src="NewCollection/3.png"
+                  alt="Brand label"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 
@@ -99,7 +92,7 @@ const NewCollection = () => {
             </div>
           </div>
 
-          <div className="hidden lg:block" style={{ height: '900px' }}> {/* Desktop video container */}
+          <div className="hidden lg:block" style={{ height: '900px' }}>
             <video
               ref={videoRef}
               autoPlay
