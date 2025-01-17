@@ -2,11 +2,8 @@ import React from 'react';
 import { Route, Navigate } from "react-router-dom";
 import { PageLoader } from "@/components/PageLoader";
 
-// Lazy load pages with reduced chunk size
-const Index = React.lazy(() => import("@/pages/Index"), { 
-  suspense: true,
-  loading: PageLoader 
-});
+// Lazy load pages
+const Index = React.lazy(() => import("@/pages/Index"));
 const CategoryPage = React.lazy(() => import("@/pages/CategoryPage"));
 const GiftUniversePage = React.lazy(() => import("@/pages/GiftUniversePage"));
 const CartPage = React.lazy(() => import('@/pages/CartPage'));

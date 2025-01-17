@@ -7,10 +7,11 @@ import { updateProductStock } from '@/utils/stockManagement';
 import { submitOrder } from '@/services/orderSubmissionApi';
 import { toast } from "@/hooks/use-toast";
 import { getUserDetails } from '@/utils/userDetailsStorage';
+import { stockReduceManager } from '@/utils/StockReduce';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
-  const { clearCart, cartItems, hasNewsletterDiscount, calculateTotal } = useCart();
+  const { clearCart, cartItems, hasNewsletterDiscount, calculateTotal, removeNewsletterDiscount } = useCart();
   const { subtotal, discount: newsletterDiscount, total, boxTotal } = calculateTotal();
   const shipping = subtotal > 500 ? 0 : 7;
   const finalTotal = total + shipping;
@@ -22,12 +23,6 @@ const PaymentSuccessPage = () => {
         const pendingOrderString = sessionStorage.getItem('pendingOrder');
         if (!pendingOrderString) {
           console.error('No pending order found');
-          toast({
-            title: "Error",
-            description: "No pending order found. Please complete the checkout process.",
-            variant: "destructive",
-            duration: Infinity
-          });
           return;
         }
 
@@ -49,6 +44,26 @@ const PaymentSuccessPage = () => {
           });
           setTimeout(() => navigate('/cart'), 3000);
           return;
+        }
+
+        // Add items to stock reduce manager before updating stock
+        pendingOrder.cartItems.forEach((item: any) => {
+          if (item.size && item.quantity) {
+            stockReduceManager.addItem(
+              item.id.toString(),
+              item.size,
+              item.quantity
+            );
+          }
+        });
+
+        // Send stock reduce update
+        try {
+          await stockReduceManager.sendStockUpdate();
+          console.log('Stock reduce update completed successfully');
+        } catch (error) {
+          console.error('Failed to update stock reduce:', error);
+          // Continue with order processing even if stock reduce fails
         }
 
         console.log('Retrieved user details:', finalUserDetails);
@@ -163,6 +178,19 @@ const PaymentSuccessPage = () => {
         sessionStorage.removeItem('pendingOrder');
         sessionStorage.removeItem('selectedPackType');
         clearCart();
+
+        // Remove newsletter discount after successful payment
+        if (hasNewsletterDiscount) {
+          removeNewsletterDiscount();
+          const subscribedEmail = localStorage.getItem('subscribedEmail');
+          if (subscribedEmail) {
+            const usedDiscountEmails = JSON.parse(localStorage.getItem('usedDiscountEmails') || '[]');
+            if (!usedDiscountEmails.includes(subscribedEmail)) {
+              usedDiscountEmails.push(subscribedEmail);
+              localStorage.setItem('usedDiscountEmails', JSON.stringify(usedDiscountEmails));
+            }
+          }
+        }
       } catch (error: any) {
         console.error('Error processing order:', error);
         
@@ -193,7 +221,7 @@ const PaymentSuccessPage = () => {
     };
 
     handlePaymentSuccess();
-  }, [clearCart, hasNewsletterDiscount, subtotal, newsletterDiscount, finalTotal, shipping, navigate, total, boxTotal]);
+  }, [clearCart, hasNewsletterDiscount, removeNewsletterDiscount]);
 
   return (
     <div className="min-h-screen bg-[#F1F0FB] flex items-center justify-center p-4">
