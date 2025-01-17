@@ -49,6 +49,8 @@ const PaymentButtons = ({
 
     try {
       const orderId = `ORDER-${Date.now()}`;
+      // Set payment initiation timestamp
+      sessionStorage.setItem('paymentInitiated', Date.now().toString());
 
       if (BYPASS_PAYMENT) {
         console.log('Payment bypassed for testing - simulating successful payment');
@@ -87,6 +89,7 @@ const PaymentButtons = ({
       }
     } catch (error: any) {
       console.error('Payment error:', error);
+      sessionStorage.removeItem('paymentInitiated');
       
       let errorMessage = "Une erreur s'est produite lors de l'initialisation du paiement.";
       if (error.message.includes('Invalid amount')) {
