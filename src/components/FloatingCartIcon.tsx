@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const FloatingCartIcon = () => {
   const [isVisible, setIsVisible] = useState(false);
   const { cartItems } = useCart();
-  const itemCount = cartItems.length;
+  const itemCount = cartItems?.length || 0;
 
   useEffect(() => {
     const handleScroll = () => {
