@@ -17,7 +17,7 @@ const Step2 = () => {
   const [hallalFood, sethallalFood] = useState(0); 
   const { t } = useTranslation();
 
-  const saveData = async () => { // Marking this function as async
+  const saveData = async () => {
     const data = {
       foodType,
       isFrozen,
@@ -29,14 +29,14 @@ const Step2 = () => {
     
     try {
       await AsyncStorage.setItem('step2data', JSON.stringify(data));
-      console.log('Data saved:', data); // You can replace this with your actual saving logic
+      console.log('Data saved:', data);
     } catch (error) {
       console.error('Error saving data:', error);
     }
   };
 
   useEffect(() => {
-    saveData(); // Calling the async function here
+    saveData();
   }, [foodType, isFrozen, preparationDate, additionalNote, allergensContamination, hallalFood]);
 
   const handleDateChange = (event, selectedDate) => {
@@ -59,37 +59,40 @@ const Step2 = () => {
             style={styles.picker}
             onValueChange={(itemValue) => setFoodType(itemValue)}
           >
-            <Picker.Item label={t('Step2.SelectFoodType')}  value="" />
+            <Picker.Item label={t('Step2.SelectFoodType')} value="" />
             <Picker.Item label={t('Step2.HomeCookedMeal')} value="homeCooked" />
             <Picker.Item label={t('Step2.PackagedFood')} value="packaged" />
-            <Picker.Item label={t('Step2.FreshProduce')}  value="produce" />
-            <Picker.Item label={t('Step2.CannedGoods')}  value="canned" />
+            <Picker.Item label={t('Step2.FreshProduce')} value="produce" />
+            <Picker.Item label={t('Step2.CannedGoods')} value="canned" />
           </Picker>
         </View>
       </View>
 
       <View style={styles.inputGroup}>
-  <Text style={styles.label}>{t('Step2.StorageState')}</Text>
-  <View style={styles.toggleContainer}>
-    <TouchableOpacity 
-      style={[styles.toggleOption, isFrozen === 1 && styles.toggleOptionActive]} // Checking for 1 (frozen)
-      onPress={() => setIsFrozen(1)} // Set to 1 when frozen
-    >
-      <MaterialIcons name="ac-unit" size={24} color={isFrozen === 1 ? '#fff' : '#666'} />
-      <Text style={[styles.toggleText, isFrozen === 1 && styles.toggleTextActive]}>{t('Step2.Frozen')}</Text>
-    </TouchableOpacity>
-    <TouchableOpacity 
-      style={[styles.toggleOption, isFrozen === 0 && styles.toggleOptionActive]} // Checking for 0 (room temp)
-      onPress={() => setIsFrozen(0)} // Set to 0 when room temperature
-    >
-      <MaterialIcons name="whatshot" size={24} color={isFrozen === 0 ? '#fff' : '#666'} />
-      <Text style={[styles.toggleText, isFrozen === 0 && styles.toggleTextActive]}>{t('Step2.RoomTemp')}</Text>
-    </TouchableOpacity>
-  </View>
-</View>
+        <Text style={styles.label}>{t('Step2.StorageState')}</Text>
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity 
+            style={[styles.toggleOption, isFrozen === 1 && styles.toggleOptionActive]}
+            onPress={() => setIsFrozen(1)}
+          >
+            <MaterialIcons name="ac-unit" size={24} color={isFrozen === 1 ? '#fff' : '#666'} />
+            <Text style={[styles.toggleText, isFrozen === 1 && styles.toggleTextActive]}>
+              {t('Step2.Frozen')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.toggleOption, isFrozen === 0 && styles.toggleOptionActive]}
+            onPress={() => setIsFrozen(0)}
+          >
+            <MaterialIcons name="whatshot" size={24} color={isFrozen === 0 ? '#fff' : '#666'} />
+            <Text style={[styles.toggleText, isFrozen === 0 && styles.toggleTextActive]}>
+              {t('Step2.RoomTemp')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-
-  <View style={styles.inputGroup}>
+      <View style={styles.inputGroup}>
         <Text style={styles.label}>{t('Step2.PreparationDate')}</Text>
         <TouchableOpacity 
           style={styles.inputContainer}
@@ -120,31 +123,30 @@ const Step2 = () => {
             onPress={() => setallergensContamination(!allergensContamination)}
           >
             <Text style={[styles.toggleButtonText, allergensContamination && styles.toggleTextActive]}>
-              {allergensContamination ?  t('yes') : t('no')}
+              {allergensContamination ? t('yes') : t('no')}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.safetyToggleContainer}>
-  <Text style={styles.label}>{t('Step2.IsitconsideredHalal')}</Text>
-  <TouchableOpacity
-    style={[styles.toggleButton, hallalFood && styles.toggleOptionActive]}
-    onPress={() => sethallalFood(hallalFood === 0 ? 1 : 0)} // Toggle between 0 and 1
-  >
-    <Text style={[styles.toggleButtonText, hallalFood === 1 && styles.toggleTextActive]}>
-      {hallalFood === 1 ? t('yes') : t('no')}
-    </Text>
-  </TouchableOpacity>
-</View>
-</View>
+          <Text style={styles.label}>{t('Step2.IsitconsideredHalal')}</Text>
+          <TouchableOpacity
+            style={[styles.toggleButton, hallalFood && styles.toggleOptionActive]}
+            onPress={() => sethallalFood(hallalFood === 0 ? 1 : 0)}
+          >
+            <Text style={[styles.toggleButtonText, hallalFood === 1 && styles.toggleTextActive]}>
+              {hallalFood === 1 ? t('yes') : t('no')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      {/* Additional Notes */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>{t('Step2.AdditionalNotes')}</Text>
         <View style={[styles.inputContainer, styles.textAreaContainer]}>
           <TextInput
             style={styles.textArea}
-            placeholder={t('Step2.Addanyadditionaldetails')} 
+            placeholder={t('Step2.Addanyadditionaldetails')}
             multiline
             numberOfLines={4}
             value={additionalNote}
@@ -156,7 +158,5 @@ const Step2 = () => {
     </ScrollView>
   );
 };
-
-
 
 export default Step2;
