@@ -87,40 +87,42 @@ const HeroSlider = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
           
-          <div className="relative h-full flex flex-col items-center justify-center text-center z-10">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative mb-12 group"
-            >
-              <div className="absolute inset-0 blur-3xl bg-gradient-to-r from-[#FFD700]/20 to-[#B8860B]/20 
-                            group-hover:from-[#FFD700]/30 group-hover:to-[#B8860B]/30 transition-all duration-500" />
-              <img 
-                src="https://i.ibb.co/JRtvDcgK/image-removebg-preview-3.png"
-                alt="Logo"
-                className="w-80 md:w-96 relative transform transition-all duration-500 
-                         hover:scale-105 drop-shadow-[0_0_25px_rgba(212,175,55,0.3)]
-                         group-hover:drop-shadow-[0_0_35px_rgba(212,175,55,0.4)]"
-              />
-            </motion.div>
-            
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex flex-col sm:flex-row gap-3 justify-center items-center"
-            >
-              <HeroButton to="/prod">
-                Production
-              </HeroButton>
-              <HeroButton to="/events">
-                Événementiel
-              </HeroButton>
-              <HeroButton to="/digital">
-                Digital
-              </HeroButton>
-            </motion.div>
+          <div className="relative h-full flex flex-col items-center justify-center text-center z-10 px-4">
+            <div className="flex flex-col items-center space-y-6">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 blur-3xl bg-gradient-to-r from-[#FFD700]/20 to-[#B8860B]/20 
+                              group-hover:from-[#FFD700]/30 group-hover:to-[#B8860B]/30 transition-all duration-500" />
+                <img 
+                  src="https://i.ibb.co/JRtvDcgK/image-removebg-preview-3.png"
+                  alt="Logo"
+                  className="w-80 md:w-96 relative transform transition-all duration-500 
+                           hover:scale-105 drop-shadow-[0_0_25px_rgba(212,175,55,0.3)]
+                           group-hover:drop-shadow-[0_0_35px_rgba(212,175,55,0.4)]"
+                />
+              </motion.div>
+              
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="flex flex-col sm:flex-row gap-3 justify-center items-center"
+              >
+                <HeroButton to="/prod">
+                  Production
+                </HeroButton>
+                <HeroButton to="/events">
+                  Événementiel
+                </HeroButton>
+                <HeroButton to="/digital">
+                  Digital
+                </HeroButton>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>
