@@ -22,20 +22,26 @@ const slides = [
 const HeroButton = ({ to, children }: { to: string; children: React.ReactNode }) => (
   <Link
     to={to}
-    className="group relative inline-flex items-center justify-center px-8 py-3.5 
-               overflow-hidden rounded-lg bg-gradient-to-r from-purple-600 to-purple-400 
-               transition-all duration-300 ease-out hover:scale-105 
-               hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transform"
+    className="group relative inline-flex items-center justify-center overflow-hidden rounded-full 
+               transition-all duration-300 ease-out hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
   >
-    <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-300 
-                     group-hover:opacity-0"></span>
-    <span className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] 
-                     from-purple-400 via-purple-500 to-purple-600 opacity-0 transition-all duration-300 
-                     group-hover:opacity-100"></span>
-    <span className="relative flex items-center gap-2 text-white font-medium tracking-wider text-sm">
-      {children}
-      <ArrowRight className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+    <span className="absolute inset-0 bg-gradient-to-r from-[#FFD700] via-[#E2B53E] to-[#B8860B] animate-gradient"></span>
+    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 
+                     bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] 
+                     from-[#FFD700] via-[#DAA520] to-[#B8860B]"></span>
+    <span className="relative inline-flex items-center gap-3 rounded-full 
+                     bg-black/90 px-8 py-3.5 text-sm font-medium tracking-wider
+                     transition-all duration-300 group-hover:bg-transparent border border-[#B8860B]/20">
+      <span className="text-transparent bg-gradient-to-r from-[#FFD700] via-[#E2B53E] to-[#B8860B] 
+                      bg-clip-text font-semibold group-hover:text-white transition-colors duration-300">
+        {children}
+      </span>
+      <ArrowRight className="h-4 w-4 transform transition-transform duration-300 
+                            group-hover:translate-x-1 text-[#E2B53E] group-hover:text-white" />
     </span>
+    <span className="absolute inset-0 -z-10 blur-xl bg-gradient-to-r from-[#FFD700]/30 
+                     via-[#E2B53E]/30 to-[#B8860B]/30 opacity-0 group-hover:opacity-100 
+                     transition-opacity duration-300"></span>
   </Link>
 );
 
@@ -110,14 +116,14 @@ const HeroSlider = () => {
       </AnimatePresence>
 
       <div className="absolute bottom-8 left-8 z-20">
-        <div className="bg-white/20 w-32 h-1 rounded-full overflow-hidden">
+        <div className="bg-white/20 w-32 h-1 rounded-full overflow-hidden backdrop-blur-sm">
           <motion.div
-            className="h-full bg-gradient-to-r from-purple-400 to-purple-600"
+            className="h-full bg-gradient-to-r from-[#FFD700] via-[#E2B53E] to-[#B8860B]"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.1 }}
           />
         </div>
-        <div className="text-purple-400 text-sm mt-2 font-medium tracking-wider">
+        <div className="text-[#E2B53E] text-sm mt-2 font-medium tracking-wider">
           {currentSlide + 1} / {slides.length}
         </div>
       </div>
