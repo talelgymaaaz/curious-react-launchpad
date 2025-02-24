@@ -23,25 +23,27 @@ const HeroButton = ({ to, children }: { to: string; children: React.ReactNode })
   <Link
     to={to}
     className="group relative inline-flex items-center justify-center overflow-hidden rounded-full 
-               transition-all duration-300 ease-out hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+               transition-all duration-500 ease-out hover:scale-110 hover:shadow-[0_0_40px_rgba(212,175,55,0.5)]
+               hover:-translate-y-1"
   >
     <span className="absolute inset-0 bg-gradient-to-r from-[#FFD700] via-[#E2B53E] to-[#B8860B] animate-gradient"></span>
-    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 
+    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 
                      bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] 
                      from-[#FFD700] via-[#DAA520] to-[#B8860B]"></span>
     <span className="relative inline-flex items-center gap-3 rounded-full 
                      bg-black/90 px-8 py-3.5 text-sm font-medium tracking-wider
-                     transition-all duration-300 group-hover:bg-transparent border border-[#B8860B]/20">
+                     transition-all duration-500 group-hover:bg-transparent border border-[#B8860B]/20
+                     group-hover:border-[#FFD700]/50">
       <span className="text-transparent bg-gradient-to-r from-[#FFD700] via-[#E2B53E] to-[#B8860B] 
-                      bg-clip-text font-semibold group-hover:text-white transition-colors duration-300">
+                      bg-clip-text font-semibold group-hover:text-white transition-colors duration-500">
         {children}
       </span>
-      <ArrowRight className="h-4 w-4 transform transition-transform duration-300 
+      <ArrowRight className="h-4 w-4 transform transition-transform duration-500 
                             group-hover:translate-x-1 text-[#E2B53E] group-hover:text-white" />
     </span>
     <span className="absolute inset-0 -z-10 blur-xl bg-gradient-to-r from-[#FFD700]/30 
                      via-[#E2B53E]/30 to-[#B8860B]/30 opacity-0 group-hover:opacity-100 
-                     transition-opacity duration-300"></span>
+                     transition-opacity duration-500"></span>
   </Link>
 );
 
@@ -86,20 +88,28 @@ const HeroSlider = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
           
           <div className="relative h-full flex flex-col items-center justify-center text-center z-10">
-            <motion.img 
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              src="https://i.ibb.co/JRtvDcgK/image-removebg-preview-3.png"
-              alt="Logo"
-              className="w-64 md:w-72 mb-16 transform hover:scale-105 transition-transform duration-300 drop-shadow-lg"
-            />
+              className="relative mb-12 group"
+            >
+              <div className="absolute inset-0 blur-3xl bg-gradient-to-r from-[#FFD700]/20 to-[#B8860B]/20 
+                            group-hover:from-[#FFD700]/30 group-hover:to-[#B8860B]/30 transition-all duration-500" />
+              <img 
+                src="https://i.ibb.co/JRtvDcgK/image-removebg-preview-3.png"
+                alt="Logo"
+                className="w-80 md:w-96 relative transform transition-all duration-500 
+                         hover:scale-105 drop-shadow-[0_0_25px_rgba(212,175,55,0.3)]
+                         group-hover:drop-shadow-[0_0_35px_rgba(212,175,55,0.4)]"
+              />
+            </motion.div>
             
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+              className="flex flex-col sm:flex-row gap-3 justify-center items-center"
             >
               <HeroButton to="/prod">
                 Production
