@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { ArrowRight, X, Palette, Layout, Search, Globe, Smartphone, Code, BrainCircuit, BarChart3, Target, Users, PenTool } from 'lucide-react';
 import { useState } from 'react';
@@ -210,20 +211,17 @@ const Digital = () => {
     {
       title: "Branding",
       description: "Développement de votre identité de marque pour une image forte et mémorable.",
-      features: ["Identité visuelle", "Logo design", "Charte graphique", "Stratégie de marque"],
-      gradient: "bg-gradient-to-br from-purple-500/10 via-purple-400/5 to-purple-300/10"
+      features: ["Identité visuelle", "Logo design", "Charte graphique", "Stratégie de marque"]
     },
     {
       title: "Marketing Digital",
       description: "Stratégies marketing innovantes pour accroître votre visibilité et atteindre vos objectifs.",
-      features: ["SEO", "Marketing de contenu", "Réseaux sociaux", "Publicité en ligne"],
-      gradient: "bg-gradient-to-br from-gold-500/10 via-gold-400/5 to-gold-300/10"
+      features: ["SEO", "Marketing de contenu", "Réseaux sociaux", "Publicité en ligne"]
     },
     {
       title: "Développement Sur Mesure",
       description: "Solutions digitales personnalisées pour répondre à vos besoins spécifiques.",
-      features: ["Applications Web", "Applications Mobile", "Solutions B2B/B2C"],
-      gradient: "bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-blue-300/10"
+      features: ["Applications Web", "Applications Mobile", "Solutions B2B/B2C"]
     }
   ];
 
@@ -231,15 +229,26 @@ const Digital = () => {
     <div className="bg-rich-black text-off-white">
       <VideoBackground
         videoUrl="https://player.vimeo.com/external/451776276.sd.mp4?s=2e4be06fb91c7a572aa2b74b26c72bfed800c583&profile_id=165&oauth2_token_id=57447761"
-        overlay="bg-gradient-to-b from-purple-900/80 via-black/70 to-black/95"
+        overlay="bg-gradient-to-b from-gold-900/80 via-black/70 to-black/95"
       >
         <div className="relative z-10 h-full flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-blend-overlay"
+            style={{ 
+              backgroundImage: `url(https://im.runware.ai/image/ws/0.5/ii/ccb25159-876c-45e9-bc0a-d4797cd0f8cb.webp)`,
+              backgroundColor: 'rgba(245, 158, 11, 0.1)' // Gold tint
+            }}
+          />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_black_100%)] opacity-70" />
           
+          {/* Digital pattern overlay with gold theme */}
           <div className="absolute inset-0 opacity-10">
             <div className="h-full w-full"
                  style={{
-                   backgroundImage: `linear-gradient(45deg, rgba(139, 92, 246, 0.1) 25%, transparent 25%, transparent 50%, rgba(139, 92, 246, 0.1) 50%, rgba(139, 92, 246, 0.1) 75%, transparent 75%, transparent)`,
+                   backgroundImage: `
+                     linear-gradient(0deg, transparent 24%, rgba(245, 158, 11, 0.3) 25%, rgba(245, 158, 11, 0.3) 26%, transparent 27%, transparent 74%, rgba(245, 158, 11, 0.3) 75%, rgba(245, 158, 11, 0.3) 76%, transparent 77%, transparent),
+                     linear-gradient(90deg, transparent 24%, rgba(245, 158, 11, 0.3) 25%, rgba(245, 158, 11, 0.3) 26%, transparent 27%, transparent 74%, rgba(245, 158, 11, 0.3) 75%, rgba(245, 158, 11, 0.3) 76%, transparent 77%, transparent)
+                   `,
                    backgroundSize: '50px 50px'
                  }}
             />
@@ -251,17 +260,17 @@ const Digital = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6"
             >
-              <div className="w-20 h-1 bg-gradient-to-r from-purple-400 to-purple-600 mx-auto rounded-full mb-6" />
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white font-playfair">
-                Solutions <span className="text-purple-400">Digitales</span>
+              <div className="w-20 h-1 bg-gradient-to-r from-gold-400 to-gold-600 mx-auto rounded-full mb-6" />
+              <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white gold-text-shadow">
+                Solutions <span className="text-gold-400">Digitales</span>
               </h1>
-              <div className="w-20 h-1 bg-gradient-to-r from-purple-600 to-purple-400 mx-auto rounded-full mt-6" />
+              <div className="w-20 h-1 bg-gradient-to-r from-gold-600 to-gold-400 mx-auto rounded-full mt-6" />
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-xl text-gray-300 max-w-2xl mx-auto mb-8 font-light"
+              className="text-xl text-gray-300 max-w-2xl mx-auto mb-8"
             >
               Boostez votre présence en ligne avec nos services digitaux sur mesure
             </motion.p>
@@ -272,7 +281,7 @@ const Digital = () => {
             >
               <Link
                 to="/contact"
-                className="inline-flex items-center px-8 py-3 bg-purple-600 text-white hover:bg-purple-500 transition-all duration-300 rounded-lg text-lg font-medium group"
+                className="inline-flex items-center px-8 py-3 bg-gold-600 text-black hover:bg-gold-500 transition-all duration-300 rounded-lg text-lg font-medium group gold-glow"
               >
                 <span className="relative">
                   Contactez-nous
@@ -292,7 +301,7 @@ const Digital = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 font-playfair">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
               Nos Services
             </h2>
             <p className="text-xl text-white/80">
@@ -310,21 +319,21 @@ const Digital = () => {
                 transition={{ delay: index * 0.2 }}
                 className="relative group h-full"
               >
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-purple-400 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-                <div className={`relative p-8 rounded-xl hover:transform hover:scale-105 transition-all duration-300 flex flex-col h-full backdrop-blur-xl ${service.gradient} border border-white/10`}>
-                  <h3 className="text-2xl font-bold mb-4 font-playfair">{service.title}</h3>
+                <div className="absolute -inset-1 bg-gradient-to-r from-gold-600 to-gold-400 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+                <div className="relative luxury-card p-8 rounded-xl hover:transform hover:scale-105 transition-all duration-300 flex flex-col h-full">
+                  <h3 className="text-2xl font-bold mb-4">{service.title}</h3>
                   <p className="text-white/80 mb-8">{service.description}</p>
                   <ul className="space-y-3 mb-8 flex-grow">
                     {service.features.map((feature, idx) => (
                       <motion.li 
                         key={idx}
-                        className="flex items-center text-white/70 cursor-pointer hover:text-white transition-colors group"
+                        className="flex items-center text-white/70 cursor-pointer hover:text-white transition-colors"
                         onClick={() => setSelectedFeature(featureDetails[feature])}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         {featureDetails[feature].icon}
-                        <span className="ml-3 group-hover:text-purple-400 transition-colors">{feature}</span>
+                        <span className="ml-3">{feature}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -336,11 +345,11 @@ const Digital = () => {
       </section>
 
       <Dialog open={!!selectedFeature} onOpenChange={() => setSelectedFeature(null)}>
-        <DialogContent className="bg-rich-black border border-purple-500/20 text-white p-8 rounded-lg max-w-3xl mx-4">
+        <DialogContent className="bg-rich-black border border-gold-500/20 text-white p-8 rounded-lg max-w-3xl mx-4">
           <div className="relative">
             <button
               onClick={() => setSelectedFeature(null)}
-              className="absolute right-0 top-0 p-2 text-purple-400 hover:text-purple-300 transition-colors"
+              className="absolute right-0 top-0 p-2 text-gold-400 hover:text-gold-300 transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -352,7 +361,7 @@ const Digital = () => {
             >
               <div className="flex items-center space-x-4">
                 {selectedFeature?.icon}
-                <h2 className="text-3xl font-bold text-purple-400 font-playfair">
+                <h2 className="text-3xl font-bold text-gold-400">
                   {selectedFeature?.title}
                 </h2>
               </div>
@@ -362,8 +371,8 @@ const Digital = () => {
               </p>
 
               <div className="grid md:grid-cols-2 gap-8 mt-8">
-                <div className="backdrop-blur-lg bg-purple-500/5 p-6 rounded-lg border border-purple-500/10">
-                  <h3 className="text-xl font-semibold text-purple-400 mb-4 font-playfair">Avantages</h3>
+                <div>
+                  <h3 className="text-xl font-semibold text-gold-400 mb-4">Avantages</h3>
                   <ul className="space-y-3">
                     {selectedFeature?.benefits.map((benefit, index) => (
                       <motion.li
@@ -373,15 +382,15 @@ const Digital = () => {
                         transition={{ delay: index * 0.1 }}
                         className="flex items-center text-white/80"
                       >
-                        <ArrowRight className="w-4 h-4 text-purple-400 mr-2" />
+                        <ArrowRight className="w-4 h-4 text-gold-400 mr-2" />
                         {benefit}
                       </motion.li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="backdrop-blur-lg bg-purple-500/5 p-6 rounded-lg border border-purple-500/10">
-                  <h3 className="text-xl font-semibold text-purple-400 mb-4 font-playfair">Notre Processus</h3>
+                <div>
+                  <h3 className="text-xl font-semibold text-gold-400 mb-4">Notre Processus</h3>
                   <ul className="space-y-3">
                     {selectedFeature?.process.map((step, index) => (
                       <motion.li
@@ -391,7 +400,7 @@ const Digital = () => {
                         transition={{ delay: index * 0.1 }}
                         className="flex items-center text-white/80"
                       >
-                        <div className="w-6 h-6 rounded-full bg-purple-400/20 text-purple-400 flex items-center justify-center mr-3 text-sm">
+                        <div className="w-6 h-6 rounded-full bg-gold-400/20 text-gold-400 flex items-center justify-center mr-3 text-sm">
                           {index + 1}
                         </div>
                         {step}
@@ -405,7 +414,7 @@ const Digital = () => {
                 <Link
                   to="/contact"
                   onClick={() => setSelectedFeature(null)}
-                  className="inline-flex items-center px-6 py-3 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-400 transition-colors"
+                  className="inline-flex items-center px-6 py-3 bg-gold-400 text-black rounded-lg font-medium hover:bg-gold-300 transition-colors"
                 >
                   <motion.div
                     whileHover={{ scale: 1.05 }}
