@@ -22,15 +22,19 @@ const slides = [
 const HeroButton = ({ to, children }: { to: string; children: React.ReactNode }) => (
   <Link
     to={to}
-    className="group relative inline-flex items-center justify-center overflow-hidden rounded-full 
-               bg-gradient-to-r from-[#E2B53E] via-[#D4AF37] to-[#B8860B] p-[2px] 
-               transition-all duration-300 ease-out hover:scale-105 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+    className="group relative inline-flex items-center justify-center px-8 py-3.5 
+               overflow-hidden rounded-lg bg-gradient-to-r from-purple-600 to-purple-400 
+               transition-all duration-300 ease-out hover:scale-105 
+               hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transform"
   >
-    <span className="relative inline-flex items-center gap-2 rounded-full 
-                     bg-black px-6 py-3 text-sm font-medium text-white 
-                     transition-all duration-300 group-hover:bg-transparent">
+    <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-300 
+                     group-hover:opacity-0"></span>
+    <span className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] 
+                     from-purple-400 via-purple-500 to-purple-600 opacity-0 transition-all duration-300 
+                     group-hover:opacity-100"></span>
+    <span className="relative flex items-center gap-2 text-white font-medium tracking-wider text-sm">
       {children}
-      <ArrowRight className="h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+      <ArrowRight className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
     </span>
   </Link>
 );
@@ -108,12 +112,12 @@ const HeroSlider = () => {
       <div className="absolute bottom-8 left-8 z-20">
         <div className="bg-white/20 w-32 h-1 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-[#E2B53E] to-[#B8860B]"
+            className="h-full bg-gradient-to-r from-purple-400 to-purple-600"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.1 }}
           />
         </div>
-        <div className="text-[#E2B53E] text-sm mt-2 font-medium tracking-wider">
+        <div className="text-purple-400 text-sm mt-2 font-medium tracking-wider">
           {currentSlide + 1} / {slides.length}
         </div>
       </div>
