@@ -13,6 +13,7 @@ export const FooterNav = ({ navigation, activeScreen }) => {
   const isHomeActive = activeScreen === ROUTES.HOME || activeScreen === ROUTES.MAP;
   
   const handleHomePress = () => {
+    // Always navigate to MAP since it's our primary route
     navigation.navigate(ROUTES.MAP);
   };
   
