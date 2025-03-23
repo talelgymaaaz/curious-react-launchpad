@@ -63,7 +63,6 @@ const UserStack = () => {
         headerShown: false,
       }}
     >
-      {/* Map MapScreen component to both MAP and HOME routes for compatibility */}
       <Stack.Screen name={ROUTES.MAP} component={MapScreen} />
       <Stack.Screen name={ROUTES.HOME} component={MapScreen} />
       <Stack.Screen name={ROUTES.PROFILE} component={ProfileScreen} />
@@ -89,6 +88,8 @@ const AdminStack = () => {
       <Stack.Screen name={ROUTES.EVENT_MANAGEMENT} component={EventManagementScreen} />
       <Stack.Screen name={ROUTES.REVIEW_MODERATION} component={ReviewModerationScreen} />
       <Stack.Screen name={ROUTES.GLOBAL_SUPERVISION} component={GlobalSupervisionScreen} />
+      {/* Add the Map screen to admin stack as well */}
+      <Stack.Screen name={ROUTES.MAP} component={MapScreen} />
     </Stack.Navigator>
   );
 };
@@ -106,6 +107,8 @@ const ProviderStack = () => {
       <Stack.Screen name={ROUTES.RESERVATION_MANAGEMENT} component={ReservationManagementScreen} />
       <Stack.Screen name={ROUTES.REVIEW_MANAGEMENT} component={ReviewManagementScreen} />
       <Stack.Screen name={ROUTES.PROMOTION_MANAGEMENT} component={PromotionManagementScreen} />
+      {/* Add the Map screen to provider stack as well */}
+      <Stack.Screen name={ROUTES.MAP} component={MapScreen} />
     </Stack.Navigator>
   );
 };

@@ -14,6 +14,10 @@ export const FooterNav = ({ navigation, activeScreen }) => {
   
   const handleHomePress = () => {
     // Always navigate to MAP since it's our primary route
+    // First check which stack the user is in based on their role
+    const { user } = navigation.getState().routes[0].params || {};
+    
+    // Fallback to normal navigation if we can't determine the user's role
     navigation.navigate(ROUTES.MAP);
   };
   
