@@ -29,7 +29,8 @@ import {
   Phone,
   Lock,
   Shield,
-  Key
+  Key,
+  FileText
 } from 'lucide-react-native';
 import * as Animatable from 'react-native-animatable';
 import { AuthContext } from '../context/AuthContext';
@@ -185,6 +186,11 @@ const SettingsScreen = ({ navigation }) => {
           icon: <Globe size={24} color={COLORS.primary} />,
           title: t('settings.language'),
           value: 'Français',
+        },
+        {
+          icon: <FileText size={24} color={COLORS.primary} />,
+          title: 'Confidentialité',
+          onPress: () => navigation.navigate(ROUTES.CONFIDENTIALITE),
         },
       ],
     },

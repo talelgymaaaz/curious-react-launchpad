@@ -14,6 +14,7 @@ export const ROUTES = {
   HISTORICAL_PLACES: 'HistoricalPlaces',
   ACOTE: 'Acote',
   RESERVATION: 'Reservation',
+  CONFIDENTIALITE: 'Confidentialite',
   
   // Admin Routes
   ADMIN_DASHBOARD: 'AdminDashboard',

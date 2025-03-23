@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,6 +14,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import HistoricalPlacesScreen from '../screens/HistoricalPlacesScreen';
 import AcoteScreen from '../screens/AcoteScreen';
 import ReservationScreen from '../screens/ReservationScreen';
+import ConfidentialiteScreen from '../screens/ConfidentialiteScreen';
 
 // Admin screens
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
@@ -70,6 +70,7 @@ const UserStack = () => {
       <Stack.Screen name={ROUTES.HISTORICAL_PLACES} component={HistoricalPlacesScreen} />
       <Stack.Screen name={ROUTES.ACOTE} component={AcoteScreen} />
       <Stack.Screen name={ROUTES.RESERVATION} component={ReservationScreen} />
+      <Stack.Screen name={ROUTES.CONFIDENTIALITE} component={ConfidentialiteScreen} />
     </Stack.Navigator>
   );
 };
@@ -90,6 +91,7 @@ const AdminStack = () => {
       <Stack.Screen name={ROUTES.GLOBAL_SUPERVISION} component={GlobalSupervisionScreen} />
       {/* Add the Map screen to admin stack as well */}
       <Stack.Screen name={ROUTES.MAP} component={MapScreen} />
+      <Stack.Screen name={ROUTES.CONFIDENTIALITE} component={ConfidentialiteScreen} />
     </Stack.Navigator>
   );
 };
@@ -109,6 +111,7 @@ const ProviderStack = () => {
       <Stack.Screen name={ROUTES.PROMOTION_MANAGEMENT} component={PromotionManagementScreen} />
       {/* Add the Map screen to provider stack as well */}
       <Stack.Screen name={ROUTES.MAP} component={MapScreen} />
+      <Stack.Screen name={ROUTES.CONFIDENTIALITE} component={ConfidentialiteScreen} />
     </Stack.Navigator>
   );
 };
