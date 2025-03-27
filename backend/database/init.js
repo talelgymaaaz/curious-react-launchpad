@@ -1,3 +1,4 @@
+
 const mysql = require("mysql2");
 const fs = require("fs");
 const path = require("path");
@@ -15,7 +16,11 @@ const sql = fs.readFileSync(path.join(__dirname, "schema.sql")).toString();
 
 // Execute SQL queries
 connection.query(sql, (err) => {
-  if (err) throw err;
+  if (err) {
+    console.error("Error executing SQL:", err);
+    process.exit(1);
+  }
   console.log("Database and tables created successfully!");
+  console.log("Test users inserted successfully!");
   connection.end();
 });

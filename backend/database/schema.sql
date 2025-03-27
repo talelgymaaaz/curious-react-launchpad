@@ -1,3 +1,4 @@
+
 -- Create database if not exists
 CREATE DATABASE IF NOT EXISTS dary_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE dary_db;
@@ -29,3 +30,16 @@ CREATE TABLE IF NOT EXISTS places (
     INDEX idx_location (location(150)), -- Reduced index length to avoid the error
     INDEX idx_coordinates (latitude, longitude) -- Keep coordinate index for fast searches
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert test users (if they don't exist)
+-- Note: The password is 'password123' for all users (hashed with bcrypt)
+INSERT IGNORE INTO users (nom, prenom, email, password_hash, role) VALUES 
+('Admin', 'Super', 'admin@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'admin'),
+('Propriétaire', 'Un', 'proprietaire1@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user'),
+('Propriétaire', 'Deux', 'proprietaire2@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user'),
+('Utilisateur', 'Simple', 'user@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user'),
+('Dubois', 'Marie', 'marie.dubois@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user'),
+('Martin', 'Jean', 'jean.martin@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user'),
+('Leroy', 'Sophie', 'sophie.leroy@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user'),
+('Durand', 'Pierre', 'pierre.durand@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'admin'),
+('Moreau', 'Inès', 'ines.moreau@example.com', '$2a$10$4UM8kVTFj0gqnY70TaQCVeTCRUmg.7oVP9bvnP9XwA.UvHQaVOHbC', 'user');
