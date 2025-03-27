@@ -1,4 +1,3 @@
-
 {
   "name": "dariapp",
   "version": "1.0.0",
@@ -12,5 +11,8 @@
     "preview": "cd frontend && npm run preview"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }

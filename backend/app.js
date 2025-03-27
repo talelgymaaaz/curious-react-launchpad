@@ -1,7 +1,7 @@
-
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
+const cors = require("cors");
 const app = express();
 require("dotenv").config();
 
@@ -10,6 +10,15 @@ require("./config/db");
 if (process.env.NODE_ENV === "development") {
   require("./database/init");
 }
+
+// Set up CORS middleware
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://127.0.0.1:8080'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 // Rest of your app.js remains the same
 app.use(express.json());
 app.use(
@@ -20,6 +29,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
+      sameSite: 'lax',
     },
   })
 );

@@ -58,13 +58,17 @@ const handleResponse = async (response: Response) => {
 export const userApi = {
   // Get all users
   getAllUsers: async (): Promise<User[]> => {
-    const response = await fetch(`${API_BASE_URL}/users`);
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      credentials: 'include',
+    });
     return handleResponse(response);
   },
 
   // Get user by ID
   getUserById: async (id: number): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`);
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      credentials: 'include',
+    });
     return handleResponse(response);
   },
 
@@ -73,6 +77,7 @@ export const userApi = {
     const response = await fetch(`${API_BASE_URL}/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(userData),
     });
     return handleResponse(response);
@@ -83,6 +88,7 @@ export const userApi = {
     const response = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(credentials),
     });
     return handleResponse(response);
@@ -92,13 +98,16 @@ export const userApi = {
   logout: async () => {
     const response = await fetch(`${API_BASE_URL}/users/logout`, {
       method: 'POST',
+      credentials: 'include',
     });
     return handleResponse(response);
   },
 
   // Get current user (me)
   getCurrentUser: async (): Promise<User> => {
-    const response = await fetch(`${API_BASE_URL}/users/me`);
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      credentials: 'include',
+    });
     return handleResponse(response);
   },
 
@@ -107,6 +116,7 @@ export const userApi = {
     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(userData),
     });
     return handleResponse(response);
@@ -116,6 +126,7 @@ export const userApi = {
   deleteUser: async (id: number) => {
     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
       method: 'DELETE',
+      credentials: 'include',
     });
     return handleResponse(response);
   },
