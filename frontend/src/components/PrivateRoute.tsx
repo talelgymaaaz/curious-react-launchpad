@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 type PrivateRouteProps = {
   element: React.ReactNode;
@@ -10,6 +11,16 @@ type PrivateRouteProps = {
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   const location = useLocation();
   const { isAuthenticated, hasAccess } = useAuth();
+  
+  // Show loading indicator while checking authentication status
+  if (localStorage.getItem('isAuthenticated') === 'true' && localStorage.getItem('userData') && !isAuthenticated) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-lg">Chargement...</span>
+      </div>
+    );
+  }
   
   // If not authenticated, redirect to login
   if (!isAuthenticated) {

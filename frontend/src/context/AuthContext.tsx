@@ -55,33 +55,67 @@ const rolePermissions = {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in on initial load
+  // Load user data from localStorage on initial load
   useEffect(() => {
     const checkAuth = async () => {
+      setIsLoading(true);
       try {
-        const userData = await userApi.getCurrentUser();
-        if (userData) {
-          // Create a name property for convenience
-          const userWithName = {
-            ...userData,
-            name: `${userData.prenom} ${userData.nom}`.trim()
-          };
-          setUser(userWithName);
+        // Try to load user from localStorage first
+        const savedUser = localStorage.getItem('userData');
+        
+        if (savedUser) {
+          // Parse and set the user from localStorage
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
           setIsAuthenticated(true);
+          
+          // Silently validate with the server in background
+          try {
+            const userData = await userApi.getCurrentUser();
+            if (userData) {
+              // Update with fresh data from server
+              const userWithName = {
+                ...userData,
+                name: `${userData.prenom} ${userData.nom}`.trim()
+              };
+              setUser(userWithName);
+              localStorage.setItem('userData', JSON.stringify(userWithName));
+            }
+          } catch (serverError) {
+            console.log('Session expired or invalid, will need to login again');
+            // Don't logout here, let the API interceptor handle 401 errors
+          }
+        } else {
+          // No saved user, check with the server
+          try {
+            const userData = await userApi.getCurrentUser();
+            if (userData) {
+              const userWithName = {
+                ...userData,
+                name: `${userData.prenom} ${userData.nom}`.trim()
+              };
+              setUser(userWithName);
+              setIsAuthenticated(true);
+              localStorage.setItem('userData', JSON.stringify(userWithName));
+              localStorage.setItem('isAuthenticated', 'true');
+            }
+          } catch (error) {
+            // Not authenticated, clear storage
+            localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('userData');
+            console.log('Not authenticated', error);
+          }
         }
-      } catch (error) {
-        // User is not logged in, clear any stale data
-        localStorage.removeItem('isAuthenticated');
-        console.log('Not authenticated', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
-    if (localStorage.getItem('isAuthenticated') === 'true') {
-      checkAuth();
-    }
+    checkAuth();
   }, []);
 
   // Function to check if user has access to a specific route
@@ -112,7 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: `${response.user.prenom} ${response.user.nom}`.trim() 
         };
         
+        // Store both the authentication flag and the user data
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userData', JSON.stringify(loggedInUser));
         
         setUser(loggedInUser);
         setIsAuthenticated(true);
@@ -150,8 +186,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     } finally {
-      // Clear local state regardless of API success
+      // Clear all authentication data
       localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userData');
       setUser(null);
       setIsAuthenticated(false);
       navigate('/login');
