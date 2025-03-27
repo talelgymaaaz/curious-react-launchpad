@@ -128,13 +128,17 @@ export const Sidebar: React.FC = () => {
               !isOpen && "lg:justify-center lg:space-x-0"
             )}>
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                {user?.name.charAt(0) || 'A'}
+                {/* Add null check and fallback for user name */}
+                {user && user.name ? user.name.charAt(0) : user && user.prenom ? user.prenom.charAt(0) : 'U'}
               </div>
               <div className={cn(
                 "transition-all duration-300 flex-1",
                 !isOpen && "lg:w-0 lg:opacity-0 lg:hidden"
               )}>
-                <div className="text-sm font-medium">{user?.name || 'User'}</div>
+                {/* Add null check and fallback for user display name */}
+                <div className="text-sm font-medium">
+                  {user ? (user.name || `${user.prenom || ''} ${user.nom || ''}`.trim()) : 'User'}
+                </div>
                 <div className="text-xs text-muted-foreground">{user?.email || 'user@example.com'}</div>
               </div>
               <button 

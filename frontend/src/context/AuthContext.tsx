@@ -10,6 +10,8 @@ interface AuthUser {
   prenom: string;
   email: string;
   role: 'admin' | 'user';
+  // Add a virtual property for convenience
+  name?: string;
 }
 
 interface AuthContextType {
@@ -35,7 +37,7 @@ export const useAuth = () => {
 // Define route access by role
 const roleAccess = {
   user: ['/dashboard'],
-  admin: ['/dashboard', '/properties', '/users', '/messages', '/settings']
+  admin: ['/dashboard', '/properties', '/users', '/messages', '/bookings', '/reviews', '/settings']
 };
 
 // Define action permissions by role and resource
@@ -45,8 +47,8 @@ const rolePermissions = {
     delete: []
   },
   admin: {
-    edit: ['users', 'settings'],
-    delete: ['properties', 'users', 'messages']
+    edit: ['users', 'settings', 'properties', 'bookings'],
+    delete: ['properties', 'users', 'messages', 'bookings']
   }
 };
 
@@ -62,12 +64,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const userData = await userApi.getCurrentUser();
         if (userData) {
-          setUser(userData);
+          // Create a name property for convenience
+          const userWithName = {
+            ...userData,
+            name: `${userData.prenom} ${userData.nom}`.trim()
+          };
+          setUser(userWithName);
           setIsAuthenticated(true);
         }
       } catch (error) {
         // User is not logged in, clear any stale data
         localStorage.removeItem('isAuthenticated');
+        console.log('Not authenticated', error);
       }
     };
     
@@ -99,7 +107,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await userApi.login({ email, password });
       
       if (response && response.user) {
-        const loggedInUser = response.user;
+        const loggedInUser = {
+          ...response.user,
+          name: `${response.user.prenom} ${response.user.nom}`.trim() 
+        };
         
         localStorage.setItem('isAuthenticated', 'true');
         
