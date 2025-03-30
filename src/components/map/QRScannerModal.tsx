@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
 import { Camera } from 'expo-camera';
@@ -158,7 +159,7 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
         <Camera
           ref={cameraRef}
           style={StyleSheet.absoluteFillObject}
-          type={Camera.Constants.Type.back}
+          type={Camera.Constants && Camera.Constants.Type ? Camera.Constants.Type.back : undefined}
           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
           barCodeScannerSettings={{
             barCodeTypes: ['qr'],
@@ -432,3 +433,4 @@ const styles = StyleSheet.create({
 });
 
 export default QRScannerModal;
+
