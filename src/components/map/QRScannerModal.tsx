@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
-import { Camera } from 'expo-camera';
+import * as ExpoCamera from 'expo-camera';
 import { Camera as CameraIcon } from 'lucide-react-native';
 import { wp, hp } from '../../utils/responsive';
 
@@ -19,7 +18,7 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
   const [reportText, setReportText] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
   const [attemptingPermission, setAttemptingPermission] = useState(false);
-  const cameraRef = useRef<Camera | null>(null);
+  const cameraRef = useRef<any>(null);
   
   useEffect(() => {
     if (visible) {
@@ -46,7 +45,7 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
           setHasPermission(false);
         }
       } else {
-        const { status } = await Camera.requestCameraPermissionsAsync();
+        const { status } = await ExpoCamera.requestCameraPermissionsAsync();
         setHasPermission(status === 'granted');
       }
     } catch (error) {
@@ -157,21 +156,21 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
     return (
       <View style={styles.cameraContainer}>
         {hasPermission && (
-          <Camera
+          <ExpoCamera.CameraView
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            type="back"
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            barCodeScannerSettings={{
-              barCodeTypes: ['qr'],
+            facing={ExpoCamera.CameraFacing.Back}
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
             }}
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           >
             {scanned && (
               <View style={styles.scannedOverlay}>
                 <Text style={styles.scannedText}>QR Code scanné avec succès!</Text>
               </View>
             )}
-          </Camera>
+          </ExpoCamera.CameraView>
         )}
         
         <View style={styles.overlay}>
