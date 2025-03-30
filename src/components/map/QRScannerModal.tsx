@@ -46,7 +46,7 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
           setHasPermission(false);
         }
       } else {
-        const { status } = await Camera.requestPermissionsAsync();
+        const { status } = await Camera.requestCameraPermissionsAsync();
         setHasPermission(status === 'granted');
       }
     } catch (error) {
@@ -160,7 +160,7 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
           <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            type={Camera.Constants.Type.back}
+            type="back"
             barCodeScannerSettings={{
               barCodeTypes: ['qr'],
             }}

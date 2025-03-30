@@ -49,7 +49,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         }
       } else {
         // For mobile platforms, use Expo's API
-        const { status } = await Camera.requestPermissionsAsync();
+        const { status } = await Camera.requestCameraPermissionsAsync();
         setHasPermission(status === 'granted');
       }
     } catch (error) {
@@ -115,7 +115,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            type={Camera.Constants.Type.back}
+            type="back"
             barCodeScannerSettings={{
               barCodeTypes: ['qr'],
             }}
