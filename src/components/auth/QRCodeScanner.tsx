@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Camera } from 'expo-camera';
@@ -21,7 +20,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [attemptingPermission, setAttemptingPermission] = useState(false);
-  const cameraRef = useRef<Camera | null>(null);
+  const cameraRef = useRef<any>(null);
 
   useEffect(() => {
     requestCameraPermission();
@@ -111,15 +110,17 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
     return (
       <View style={StyleSheet.absoluteFill}>
-        <Camera
-          ref={cameraRef}
-          style={StyleSheet.absoluteFillObject}
-          type={Camera.Constants.Type.back}
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          barCodeScannerSettings={{
-            barCodeTypes: ['qr'],
-          }}
-        />
+        {hasPermission && (
+          <Camera
+            ref={cameraRef}
+            style={StyleSheet.absoluteFillObject}
+            type="back"
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            barCodeScannerSettings={{
+              barCodeTypes: ['qr'],
+            }}
+          />
+        )}
         <View style={styles.overlay}>
           <View style={styles.unfilled} />
           <View style={styles.row}>
