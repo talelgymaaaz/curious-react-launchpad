@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
-import * as ExpoCamera from 'expo-camera';
+import { Camera } from 'expo-camera';
 import { Camera as CameraIcon } from 'lucide-react-native';
 import { wp, hp } from '../../utils/responsive';
 
@@ -45,7 +46,7 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
           setHasPermission(false);
         }
       } else {
-        const { status } = await ExpoCamera.requestCameraPermissionsAsync();
+        const { status } = await Camera.requestPermissionsAsync();
         setHasPermission(status === 'granted');
       }
     } catch (error) {
@@ -156,21 +157,21 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
     return (
       <View style={styles.cameraContainer}>
         {hasPermission && (
-          <ExpoCamera.CameraView
+          <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            facing={ExpoCamera.CameraFacing.Back}
-            barcodeScannerSettings={{
-              barcodeTypes: ['qr'],
+            type={Camera.Constants.Type.back}
+            barCodeScannerSettings={{
+              barCodeTypes: ['qr'],
             }}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
           >
             {scanned && (
               <View style={styles.scannedOverlay}>
                 <Text style={styles.scannedText}>QR Code scanné avec succès!</Text>
               </View>
             )}
-          </ExpoCamera.CameraView>
+          </Camera>
         )}
         
         <View style={styles.overlay}>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Platform } from 'react-native';
-import * as ExpoCamera from 'expo-camera';
+import { Camera } from 'expo-camera';
 import { wp, hp, fp } from '../../utils/responsive';
 import { X } from 'lucide-react-native';
 
@@ -49,7 +49,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         }
       } else {
         // For mobile platforms, use Expo's API
-        const { status } = await ExpoCamera.requestCameraPermissionsAsync();
+        const { status } = await Camera.requestPermissionsAsync();
         setHasPermission(status === 'granted');
       }
     } catch (error) {
@@ -112,14 +112,14 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     return (
       <View style={StyleSheet.absoluteFill}>
         {hasPermission && (
-          <ExpoCamera.CameraView
+          <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            facing={ExpoCamera.CameraFacing.Back}
-            barcodeScannerSettings={{
-              barcodeTypes: ['qr'],
+            type={Camera.Constants.Type.back}
+            barCodeScannerSettings={{
+              barCodeTypes: ['qr'],
             }}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
           />
         )}
         <View style={styles.overlay}>
