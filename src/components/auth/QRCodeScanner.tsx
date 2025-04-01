@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Camera } from 'expo-camera';
@@ -121,7 +120,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            type={Camera.Constants.Type.back}
+            type="back"
             barCodeScannerSettings={{
               barCodeTypes: ['qr'],
             }}
