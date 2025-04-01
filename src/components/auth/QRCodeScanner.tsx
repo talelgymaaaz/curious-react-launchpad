@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Platform } from 'react-native';
-import { Camera } from 'expo-camera';
+import { CameraView, BarcodeScanningResult } from 'expo-camera';
 import { wp, hp, fp } from '../../utils/responsive';
 import { X } from 'lucide-react-native';
 
@@ -20,7 +20,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   const [attemptingPermission, setAttemptingPermission] = useState(false);
-  const cameraRef = useRef<any>(null);
 
   useEffect(() => {
     requestCameraPermission();
@@ -29,34 +28,8 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const requestCameraPermission = async () => {
     setAttemptingPermission(true);
     try {
-      if (Platform.OS === 'web') {
-        try {
-          // Test if we can access the camera
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
-          
-          if (videoDevices.length > 0) {
-            // There are video devices, now check if we can access them
-            await navigator.mediaDevices.getUserMedia({ video: true });
-            setHasPermission(true);
-          } else {
-            setHasPermission(false);
-          }
-        } catch (error) {
-          console.log("Web camera permission error:", error);
-          setHasPermission(false);
-        }
-      } else {
-        // First check if we already have permission
-        const { status } = await Camera.getCameraPermissionsAsync();
-        setHasPermission(status === 'granted');
-        
-        if (status !== 'granted') {
-          // If not, request permission
-          const { status: newStatus } = await Camera.requestCameraPermissionsAsync();
-          setHasPermission(newStatus === 'granted');
-        }
-      }
+      const { status } = await CameraView.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
     } catch (error) {
       console.log("Error requesting camera permission:", error);
       setHasPermission(false);
@@ -65,7 +38,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   };
 
-  const handleBarCodeScanned = ({ data, type }: { data: string, type: string }) => {
+  const handleBarCodeScanned = ({ data }: BarcodeScanningResult) => {
     if (scanned) return;
     setScanned(true);
     onScan(data);
@@ -117,14 +90,13 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     return (
       <View style={StyleSheet.absoluteFill}>
         {hasPermission && (
-          <Camera
-            ref={cameraRef}
+          <CameraView
             style={StyleSheet.absoluteFillObject}
-            type="back"
-            barCodeScannerSettings={{
-              barCodeTypes: ['qr'],
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
             }}
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           />
         )}
         <View style={styles.overlay}>

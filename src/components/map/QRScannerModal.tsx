@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
-import { Camera } from 'expo-camera';
+import { CameraView, BarcodeScanningResult, PermissionResponse } from 'expo-camera';
 import { Camera as CameraIcon } from 'lucide-react-native';
 import { wp, hp } from '../../utils/responsive';
 
@@ -18,7 +18,6 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
   const [reportText, setReportText] = useState('');
   const [photoTaken, setPhotoTaken] = useState(false);
   const [attemptingPermission, setAttemptingPermission] = useState(false);
-  const cameraRef = useRef<any>(null);
   
   useEffect(() => {
     if (visible) {
@@ -29,32 +28,8 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
   const requestCameraPermission = async () => {
     setAttemptingPermission(true);
     try {
-      if (Platform.OS === 'web') {
-        try {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
-          
-          if (videoDevices.length > 0) {
-            await navigator.mediaDevices.getUserMedia({ video: true });
-            setHasPermission(true);
-          } else {
-            setHasPermission(false);
-          }
-        } catch (error) {
-          console.log("Web camera permission error:", error);
-          setHasPermission(false);
-        }
-      } else {
-        // First check if we already have permission
-        const { status } = await Camera.getCameraPermissionsAsync();
-        setHasPermission(status === 'granted');
-        
-        if (status !== 'granted') {
-          // If not, request permission
-          const { status: newStatus } = await Camera.requestCameraPermissionsAsync();
-          setHasPermission(newStatus === 'granted');
-        }
-      }
+      const { status } = await CameraView.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
     } catch (error) {
       console.log("Error requesting camera permission:", error);
       setHasPermission(false);
@@ -63,8 +38,10 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
     }
   };
   
-  const handleBarCodeScanned = ({ data, type }: { data: string, type: string }) => {
+  const handleBarCodeScanned = (result: BarcodeScanningResult) => {
     if (scanned) return;
+    
+    const { data } = result;
     setScanned(true);
     
     if (data.includes(String(checkpointId))) {
@@ -163,21 +140,20 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
     return (
       <View style={styles.cameraContainer}>
         {hasPermission && (
-          <Camera
-            ref={cameraRef}
+          <CameraView
             style={StyleSheet.absoluteFillObject}
-            type="back"
-            barCodeScannerSettings={{
-              barCodeTypes: ['qr'],
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
             }}
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           >
             {scanned && (
               <View style={styles.scannedOverlay}>
                 <Text style={styles.scannedText}>QR Code scanné avec succès!</Text>
               </View>
             )}
-          </Camera>
+          </CameraView>
         )}
         
         <View style={styles.overlay}>
