@@ -48,11 +48,12 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           setHasPermission(false);
         }
       } else {
-        // For mobile platforms, use Expo's API - using the correct method name
+        // First check if we already have permission
         const { status } = await Camera.getCameraPermissionsAsync();
         setHasPermission(status === 'granted');
         
         if (status !== 'granted') {
+          // If not, request permission
           const { status: newStatus } = await Camera.requestCameraPermissionsAsync();
           setHasPermission(newStatus === 'granted');
         }
@@ -117,14 +118,14 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     return (
       <View style={StyleSheet.absoluteFill}>
         {hasPermission && (
-          <Camera.CameraView
+          <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            facing={Camera.CameraFacing.Back}
-            barcodeScannerSettings={{
+            type={Camera.Constants.Type.back}
+            barCodeScannerSettings={{
               barCodeTypes: ['qr'],
             }}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
           />
         )}
         <View style={styles.overlay}>

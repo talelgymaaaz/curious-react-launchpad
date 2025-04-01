@@ -163,21 +163,21 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
     return (
       <View style={styles.cameraContainer}>
         {hasPermission && (
-          <Camera.CameraView
+          <Camera
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            facing={Camera.CameraFacing.Back}
-            barcodeScannerSettings={{
+            type={Camera.Constants.Type.back}
+            barCodeScannerSettings={{
               barCodeTypes: ['qr'],
             }}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
           >
             {scanned && (
               <View style={styles.scannedOverlay}>
                 <Text style={styles.scannedText}>QR Code scanné avec succès!</Text>
               </View>
             )}
-          </Camera.CameraView>
+          </Camera>
         )}
         
         <View style={styles.overlay}>
