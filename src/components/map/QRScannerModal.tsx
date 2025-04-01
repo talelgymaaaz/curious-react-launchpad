@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
 import { Camera } from 'expo-camera';
@@ -46,8 +45,15 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
           setHasPermission(false);
         }
       } else {
-        const { status } = await Camera.requestCameraPermissionsAsync();
+        // First check if we already have permission
+        const { status } = await Camera.getCameraPermissionsAsync();
         setHasPermission(status === 'granted');
+        
+        if (status !== 'granted') {
+          // If not, request permission
+          const { status: newStatus } = await Camera.requestCameraPermissionsAsync();
+          setHasPermission(newStatus === 'granted');
+        }
       }
     } catch (error) {
       console.log("Error requesting camera permission:", error);
@@ -157,21 +163,21 @@ const QRScannerModal = ({ visible, onClose, checkpointId, colors }: QRScannerMod
     return (
       <View style={styles.cameraContainer}>
         {hasPermission && (
-          <Camera
+          <Camera.CameraView
             ref={cameraRef}
             style={StyleSheet.absoluteFillObject}
-            type="back"
-            barCodeScannerSettings={{
+            facing={Camera.CameraFacing.Back}
+            barcodeScannerSettings={{
               barCodeTypes: ['qr'],
             }}
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           >
             {scanned && (
               <View style={styles.scannedOverlay}>
                 <Text style={styles.scannedText}>QR Code scanné avec succès!</Text>
               </View>
             )}
-          </Camera>
+          </Camera.CameraView>
         )}
         
         <View style={styles.overlay}>
