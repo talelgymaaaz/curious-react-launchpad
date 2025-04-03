@@ -1,4 +1,3 @@
-
 import React, { useState, useContext } from 'react';
 import { 
   View, 
@@ -61,7 +60,7 @@ const ForgotPasswordScreen = () => {
       setEmail(submittedEmail);
       setResetCode(code);
       
-      // Move to next step
+      // Move to next step - ensure this always executes after successful API call
       setCurrentStep(2);
     } catch (err) {
       setError(t('forgotPassword.emailError') || 'Failed to send verification code');
@@ -192,11 +191,23 @@ const ForgotPasswordScreen = () => {
           
           <TouchableOpacity 
             style={styles.backButton} 
-            onPress={() => navigation.navigate(ROUTES.LOGIN)}
-            disabled={loading || currentStep === 4}
+            onPress={() => {
+              // Only navigate to login if on the first step or completed the process
+              if (currentStep === 1 || currentStep === 4) {
+                navigation.navigate(ROUTES.LOGIN);
+              } else {
+                // Otherwise go back one step
+                setCurrentStep(currentStep - 1);
+              }
+            }}
+            disabled={loading}
           >
             <Text style={styles.backButtonText}>
-              {t('forgotPassword.backToLogin') || 'Back to Login'}
+              {currentStep === 1 ? 
+                (t('forgotPassword.backToLogin') || 'Back to Login') : 
+                (currentStep === 4 ? 
+                  (t('forgotPassword.backToLogin') || 'Back to Login') : 
+                  (t('forgotPassword.backStep') || 'Back'))}
             </Text>
           </TouchableOpacity>
         </ScrollView>
