@@ -268,27 +268,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Updated to match the API spec with email and resetCode
+  // Make sure this function matches the API endpoint specification
   const forgotPassword = async (email, resetCode) => {
     setLoading(true);
     setError(null);
     
     try {
+      console.log(`Sending forgot password request for ${email} with code ${resetCode}`);
+      
       const response = await fetch(`${API_URL}${ENDPOINTS.FORGOT_PASSWORD}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, resetCode }),
+        body: JSON.stringify({ 
+          email, 
+          resetCode 
+        }),
       });
 
       const result = await response.json();
+      console.log('Forgot password response:', result);
 
       if (!response.ok) {
         throw new Error(result.message || 'Failed to request password reset');
       }
 
-      console.log('Forgot password response:', result);
       return result;
     } catch (error) {
       console.error('Forgot password error:', error);
@@ -299,7 +304,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Updated to match the API spec with email, resetCode, and newPassword
+  // Make sure this function matches the API endpoint specification
   const resetPassword = async (email, resetCode, newPassword) => {
     setLoading(true);
     setError(null);

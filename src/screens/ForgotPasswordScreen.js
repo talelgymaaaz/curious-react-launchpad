@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   View, 
@@ -199,15 +200,17 @@ const ForgotPasswordScreen = () => {
             {renderStep()}
           </View>
           
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => navigation.navigate(ROUTES.LOGIN)}
-            disabled={loading || currentStep === 4}
-          >
-            <Text style={styles.backButtonText}>
-              {t('forgotPassword.backToLogin') || 'Back to Login'}
-            </Text>
-          </TouchableOpacity>
+          {currentStep !== 4 && (
+            <TouchableOpacity 
+              style={styles.backButton} 
+              onPress={() => navigation.navigate(ROUTES.LOGIN)}
+              disabled={loading}
+            >
+              <Text style={styles.backButtonText}>
+                {t('forgotPassword.backToLogin') || 'Back to Login'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
