@@ -284,20 +284,20 @@ export const AuthProvider = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Échec de la demande de réinitialisation');
+        throw new Error(result.message || 'Failed to send reset code');
       }
 
       return result;
     } catch (error) {
-      console.error('Erreur de réinitialisation:', error);
-      setError(error.message || 'Échec de la demande de réinitialisation. Veuillez réessayer.');
+      console.error('Password reset request error:', error);
+      setError(error.message || 'Failed to send reset code. Please try again.');
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const resetPassword = async (email, password) => {
+  const resetPassword = async (email, resetCode, newPassword) => {
     setLoading(true);
     setError(null);
     
@@ -307,19 +307,19 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, resetCode, newPassword }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Échec de la réinitialisation du mot de passe');
+        throw new Error(result.message || 'Failed to reset password');
       }
 
       return result;
     } catch (error) {
-      console.error('Erreur de réinitialisation:', error);
-      setError(error.message || 'Échec de la réinitialisation du mot de passe. Veuillez réessayer.');
+      console.error('Password reset error:', error);
+      setError(error.message || 'Failed to reset password. Please try again.');
       throw error;
     } finally {
       setLoading(false);
