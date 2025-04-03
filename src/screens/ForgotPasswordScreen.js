@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   View, 
@@ -16,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_SIZE, FONT_FAMILY } from '../theme/typography';
-import { API_URL } from '../config/apiConfig';
+import { useAuth } from '../context/AuthContext';
 import EmailStep from '../components/forgotPassword/EmailStep';
 import VerificationStep from '../components/forgotPassword/VerificationStep';
 import ResetPasswordStep from '../components/forgotPassword/ResetPasswordStep';
@@ -27,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const ForgotPasswordScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const { forgotPassword, resetPassword } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState('');
   const [resetCode, setResetCode] = useState('');
@@ -53,26 +53,12 @@ const ForgotPasswordScreen = () => {
       // Génère un code aléatoire
       // (Generate a random code)
       const code = generateVerificationCode();
+      console.log('Generated code:', code);
       
-      // Envoie une requête à l'API pour demander la réinitialisation du mot de passe
-      // (Send a request to the API to request password reset)
-      const response = await fetch(`${API_URL}/password/forgot`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: submittedEmail,
-          resetCode: code
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Échec de l\'envoi du code');
-      }
+      // Use the auth context forgotPassword function
+      const response = await forgotPassword(submittedEmail, code);
       
-      console.log('Code envoyé avec succès:', code);
+      console.log('Code sent successfully:', code);
       
       // Stocke l'email et le code pour une vérification ultérieure
       // (Store email and code for later verification)
@@ -83,8 +69,8 @@ const ForgotPasswordScreen = () => {
       // (Move to the next step)
       setCurrentStep(2);
     } catch (err) {
-      setError(t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification');
-      console.error('Erreur lors de l\'envoi du code:', err);
+      setError(t('forgotPassword.emailError') || 'Failed to send verification code');
+      console.error('Error sending code:', err);
     } finally {
       setLoading(false);
     }
@@ -107,11 +93,11 @@ const ForgotPasswordScreen = () => {
         setVerificationCode(code);
         setCurrentStep(3);
       } else {
-        throw new Error(t('forgotPassword.verificationError') || 'Code de vérification invalide');
+        throw new Error(t('forgotPassword.verificationError') || 'Invalid verification code');
       }
     } catch (err) {
-      setError(err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide');
-      console.error('Erreur de vérification du code:', err);
+      setError(err.message || t('forgotPassword.verificationError') || 'Invalid verification code');
+      console.error('Code verification error:', err);
     } finally {
       setLoading(false);
     }
@@ -123,32 +109,17 @@ const ForgotPasswordScreen = () => {
     setError('');
     setLoading(true);
     try {
-      // Envoie une requête à l'API pour réinitialiser le mot de passe
-      // (Send a request to the API to reset the password)
-      const response = await fetch(`${API_URL}/password/reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Échec de la réinitialisation du mot de passe');
-      }
+      // Use the auth context resetPassword function with the correct parameters
+      await resetPassword(email, resetCode, password);
       
-      console.log('Mot de passe réinitialisé avec succès pour:', email);
+      console.log('Password reset successfully for:', email);
       
       // Passe à l'étape finale
       // (Move to the final step)
       setCurrentStep(4);
     } catch (err) {
-      setError(t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe');
-      console.error('Erreur lors de la réinitialisation du mot de passe:', err);
+      setError(t('forgotPassword.resetError') || 'Failed to reset password');
+      console.error('Password reset error:', err);
     } finally {
       setLoading(false);
     }
