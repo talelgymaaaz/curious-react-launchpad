@@ -88,7 +88,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate(ROUTES.FORGOT_PASSWORD);
+    navigation.navigate('ForgotPassword');
   };
   
   const handleGoogleLogin = async () => {
@@ -172,7 +172,7 @@ export default function LoginScreen({ navigation }) {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword}>
+            <TouchableOpacity style={styles.forgotPassword}   onPress={handleForgotPassword} >
               <Text style={styles.forgotPasswordText}>
                 {t('login.forgotPassword') || "Mot de passe oublié ?"}
               </Text>

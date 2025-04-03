@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
@@ -274,8 +273,6 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      console.log(`Sending forgot password request for ${email} with code ${resetCode}`);
-      
       const response = await fetch(`${API_URL}${ENDPOINTS.FORGOT_PASSWORD}`, {
         method: 'POST',
         headers: {
@@ -287,46 +284,42 @@ export const AuthProvider = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to send reset code');
+        throw new Error(result.message || 'Échec de la demande de réinitialisation');
       }
 
-      console.log('Forgot password response:', result);
       return result;
     } catch (error) {
-      console.error('Password reset request error:', error);
-      setError(error.message || 'Failed to send reset code. Please try again.');
+      console.error('Erreur de réinitialisation:', error);
+      setError(error.message || 'Échec de la demande de réinitialisation. Veuillez réessayer.');
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const resetPassword = async (email, resetCode, newPassword) => {
+  const resetPassword = async (email, password) => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log(`Resetting password for ${email} with code ${resetCode}`);
-      
       const response = await fetch(`${API_URL}${ENDPOINTS.RESET_PASSWORD}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, resetCode, newPassword }),
+        body: JSON.stringify({ email, password }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to reset password');
+        throw new Error(result.message || 'Échec de la réinitialisation du mot de passe');
       }
 
-      console.log('Password reset successful:', result);
       return result;
     } catch (error) {
-      console.error('Password reset error:', error);
-      setError(error.message || 'Failed to reset password. Please try again.');
+      console.error('Erreur de réinitialisation:', error);
+      setError(error.message || 'Échec de la réinitialisation du mot de passe. Veuillez réessayer.');
       throw error;
     } finally {
       setLoading(false);

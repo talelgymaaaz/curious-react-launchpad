@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   View, 
@@ -23,8 +24,8 @@ const ResetPasswordStep = ({ onSubmit, loading, error }) => {
 
   // Password strength check
   const checkPasswordStrength = (pwd) => {
-    // At least 8 chars, one uppercase, one lowercase, one number
-    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+    // At least 8 chars, one uppercase, one lowercase, one number, one special char
+    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     // At least 8 chars, one letter, one number
     const mediumRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     
@@ -57,14 +58,11 @@ const ResetPasswordStep = ({ onSubmit, loading, error }) => {
   const validatePasswords = () => {
     let isValid = true;
     
-    // Password must have at least 8 characters, one uppercase, one lowercase, and one number
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
-    
     if (!password) {
       setPasswordError(t('forgotPassword.passwordRequired') || 'Password is required');
       isValid = false;
-    } else if (!passwordRegex.test(password)) {
-      setPasswordError(t('forgotPassword.passwordRequirements') || 'Password must be at least 8 characters and include uppercase, lowercase, and numbers');
+    } else if (password.length < 6) {
+      setPasswordError(t('forgotPassword.passwordTooShort') || 'Password must be at least 6 characters');
       isValid = false;
     } else {
       setPasswordError('');
@@ -198,10 +196,6 @@ const ResetPasswordStep = ({ onSubmit, loading, error }) => {
           </Text>
         )}
       </TouchableOpacity>
-      
-      <Text style={styles.passwordRequirements}>
-        {t('forgotPassword.passwordRequirements') || 'Password must contain at least 8 characters, including uppercase, lowercase, and numbers'}
-      </Text>
     </View>
   );
 };
@@ -300,13 +294,6 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     fontSize: FONT_SIZE.sm,
     marginTop: SPACING.xs,
-  },
-  passwordRequirements: {
-    color: COLORS.gray,
-    fontSize: FONT_SIZE.xs,
-    textAlign: 'center',
-    marginTop: SPACING.md,
-    paddingHorizontal: SPACING.lg,
   },
 });
 
