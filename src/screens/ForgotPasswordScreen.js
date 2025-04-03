@@ -1,3 +1,4 @@
+
 import React, { useState, useContext } from 'react';
 import { 
   View, 
@@ -34,10 +35,10 @@ const ForgotPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Generate a random 6-digit verification code
+  // Generate a random 4-digit verification code
   const generateVerificationCode = () => {
     let code = '';
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 4; i++) {
       code += Math.floor(Math.random() * 10).toString();
     }
     return code;
@@ -51,10 +52,10 @@ const ForgotPasswordScreen = () => {
       // Generate a random code
       const code = generateVerificationCode();
       
+      console.log('Generated code:', code);
+      
       // Send a request to the API to request password reset
       await forgotPassword(submittedEmail, code);
-      
-      console.log('Reset code sent successfully:', code);
       
       // Store email and code for verification
       setEmail(submittedEmail);
@@ -78,6 +79,9 @@ const ForgotPasswordScreen = () => {
     try {
       // Convert code array to string
       const codeString = code.join('');
+      
+      console.log('Entered code:', codeString);
+      console.log('Expected code:', resetCode);
       
       // Check if entered code matches the generated code
       if (codeString === resetCode) {

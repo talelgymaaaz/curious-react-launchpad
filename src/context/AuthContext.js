@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
@@ -273,6 +274,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Sending forgot password request for ${email} with code ${resetCode}`);
+      
       const response = await fetch(`${API_URL}${ENDPOINTS.FORGOT_PASSWORD}`, {
         method: 'POST',
         headers: {
@@ -287,6 +290,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(result.message || 'Failed to send reset code');
       }
 
+      console.log('Forgot password response:', result);
       return result;
     } catch (error) {
       console.error('Password reset request error:', error);
@@ -302,6 +306,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Resetting password for ${email} with code ${resetCode}`);
+      
       const response = await fetch(`${API_URL}${ENDPOINTS.RESET_PASSWORD}`, {
         method: 'POST',
         headers: {
@@ -316,6 +322,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(result.message || 'Failed to reset password');
       }
 
+      console.log('Password reset successful:', result);
       return result;
     } catch (error) {
       console.error('Password reset error:', error);
