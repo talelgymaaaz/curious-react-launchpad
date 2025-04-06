@@ -1,3 +1,4 @@
+
 /**
  * Dashboard.tsx
  * 
@@ -34,7 +35,8 @@ import {
   Home,
   Settings,
   UserPlus,
-  Calendar
+  Calendar,
+  User
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -62,7 +64,7 @@ const Dashboard = () => {
       title: "Taux d'occupation",
       value: 86,
       change: { value: 1.3, type: "decrease" as const },
-      icon: <UserCheck className="h-4 w-4" />
+      icon: <User className="h-4 w-4" />
     }
   ];
 
