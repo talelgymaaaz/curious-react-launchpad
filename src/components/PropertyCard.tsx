@@ -1,3 +1,4 @@
+
 /**
  * PropertyCard.tsx
  * 
@@ -62,6 +63,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     // Only navigate if the click wasn't on a button
     if (!(e.target as HTMLElement).closest('button')) {
       e.preventDefault();
+      console.log(`Navigating to /properties/${property.id}`);
       navigate(`/properties/${property.id}`);
     }
   };
