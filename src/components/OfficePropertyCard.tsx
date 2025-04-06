@@ -110,10 +110,11 @@ export const OfficePropertyCard: React.FC<OfficePropertyCardProps> = ({
 
   // Empêche la propagation du clic des boutons à la carte
   const handleCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) {
-      return;
+    // Only navigate if the click wasn't on a button
+    if (!(e.target as HTMLElement).closest('button')) {
+      e.preventDefault();
+      navigate(`/properties/${property.id}`);
     }
-    navigate(`/properties/${property.id}`);
   };
 
   return (

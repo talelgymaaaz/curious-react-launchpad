@@ -59,10 +59,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const statusStyle = statusColors[property.status];
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) {
-      return;
+    // Only navigate if the click wasn't on a button
+    if (!(e.target as HTMLElement).closest('button')) {
+      e.preventDefault();
+      navigate(`/properties/${property.id}`);
     }
-    navigate(`/properties/${property.id}`);
   };
 
   return (
