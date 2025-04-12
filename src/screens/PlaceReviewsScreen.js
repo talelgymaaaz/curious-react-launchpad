@@ -1,0 +1,443 @@
+
+import React, { useState } from 'react';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  Image, 
+  ScrollView, 
+  TouchableOpacity, 
+  Platform, 
+  StatusBar, 
+  TextInput,
+  KeyboardAvoidingView
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import { 
+  ArrowLeft, 
+  Star,
+  User,
+  Calendar,
+  MessageSquare,
+  Send
+} from 'lucide-react-native';
+import { COLORS } from '../theme/colors';
+import { SPACING } from '../theme/spacing';
+import { FONT_SIZE, FONT_WEIGHT } from '../theme/typography';
+import * as Animatable from 'react-native-animatable';
+
+/**
+ * Écran des avis sur un lieu
+ * Permet de consulter et d'ajouter des avis
+ * @param {Object} route - Paramètres de route (placeId, placeName)
+ * @param {Object} navigation - Objet de navigation
+ */
+const PlaceReviewsScreen = ({ route, navigation }) => {
+  const { t } = useTranslation();
+  const { placeId, placeName } = route.params || {};
+  const [reviewText, setReviewText] = useState('');
+  const [userRating, setUserRating] = useState(0);
+  
+  // Données d'exemple des avis (à remplacer par une API dans une application réelle)
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      userName: 'Ahmed Mehdi',
+      date: '2025-04-08',
+      rating: 4,
+      comment: 'Très bon service, nourriture délicieuse et accueil chaleureux.'
+    },
+    {
+      id: 2,
+      userName: 'Fatima Jouini',
+      date: '2025-04-05',
+      rating: 5,
+      comment: 'Excellent! Je recommande vivement cet endroit à tous mes amis!'
+    },
+    {
+      id: 3,
+      userName: 'Karim Bennour',
+      date: '2025-04-01',
+      rating: 3,
+      comment: 'Service correct mais temps d\'attente un peu long.'
+    },
+    {
+      id: 4,
+      userName: 'Nadia Khaled',
+      date: '2025-03-25',
+      rating: 2,
+      comment: 'Déçu par la qualité. J\'espère qu\'ils amélioreront leur service.'
+    }
+  ]);
+
+  /**
+   * Gère la sélection d'une note
+   * @param {number} rating - La note sélectionnée (1-5)
+   */
+  const handleRatingPress = (rating) => {
+    setUserRating(rating);
+  };
+
+  /**
+   * Soumet un nouvel avis
+   */
+  const handleSubmitReview = () => {
+    if (reviewText.trim() === '' || userRating === 0) {
+      // Afficher un message d'erreur ou de validation
+      return;
+    }
+
+    // Crée un nouvel avis
+    const newReview = {
+      id: reviews.length + 1,
+      userName: 'Vous', // Dans une application réelle, utiliserait le nom de l'utilisateur connecté
+      date: new Date().toISOString().split('T')[0],
+      rating: userRating,
+      comment: reviewText
+    };
+
+    // Ajoute le nouvel avis au début de la liste
+    setReviews([newReview, ...reviews]);
+    setReviewText('');
+    setUserRating(0);
+  };
+
+  /**
+   * Formate une date pour l'affichage
+   * @param {string} dateString - Date au format ISO
+   * @returns {string} - Date formatée
+   */
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  /**
+   * Rend les étoiles pour la notation
+   * @param {number} rating - Note (1-5)
+   * @param {boolean} interactive - Si les étoiles sont cliquables
+   * @returns {JSX.Element[]} - Composants étoiles
+   */
+  const renderStars = (rating, interactive = false) => {
+    return Array(5).fill(0).map((_, index) => (
+      <TouchableOpacity
+        key={index}
+        onPress={interactive ? () => handleRatingPress(index + 1) : undefined}
+        style={styles.starContainer}
+        activeOpacity={interactive ? 0.7 : 1}
+      >
+        <Star
+          size={interactive ? 32 : 16}
+          color={index < rating ? COLORS.highlight : COLORS.gray_light}
+          fill={index < rating ? COLORS.highlight : 'none'}
+        />
+      </TouchableOpacity>
+    ));
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      
+      {/* En-tête */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ArrowLeft color={COLORS.white} size={24} />
+        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>
+            {t('placeReviews.title', 'Avis')}
+          </Text>
+          <Text style={styles.subtitle}>
+            {placeName || t('placeReviews.place', 'Lieu')}
+          </Text>
+        </View>
+      </View>
+      
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidView}
+      >
+        <ScrollView 
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Section d'ajout d'avis */}
+          <Animatable.View 
+            animation="fadeIn" 
+            duration={800} 
+            style={styles.addReviewSection}
+          >
+            <Text style={styles.sectionTitle}>
+              {t('placeReviews.leaveReview', 'Laissez votre avis')}
+            </Text>
+            
+            {/* Sélecteur de notation */}
+            <View style={styles.ratingSelector}>
+              {renderStars(userRating, true)}
+            </View>
+            
+            {/* Champ de saisie du commentaire */}
+            <View style={styles.reviewInputContainer}>
+              <TextInput
+                style={styles.reviewInput}
+                placeholder={t('placeReviews.writeReview', 'Écrivez votre avis ici...')}
+                multiline
+                value={reviewText}
+                onChangeText={setReviewText}
+                placeholderTextColor={COLORS.gray}
+              />
+              
+              {/* Bouton d'envoi */}
+              <TouchableOpacity 
+                style={[
+                  styles.submitButton,
+                  (reviewText.trim() === '' || userRating === 0) && styles.submitButtonDisabled
+                ]}
+                onPress={handleSubmitReview}
+                disabled={reviewText.trim() === '' || userRating === 0}
+              >
+                <Send size={20} color={COLORS.white} />
+              </TouchableOpacity>
+            </View>
+          </Animatable.View>
+          
+          {/* Liste des avis */}
+          <View style={styles.reviewsListSection}>
+            <Text style={styles.sectionTitle}>
+              {t('placeReviews.allReviews', 'Tous les avis')}
+              <Text style={styles.reviewCount}> ({reviews.length})</Text>
+            </Text>
+            
+            {/* Affichage de tous les avis */}
+            {reviews.map((review, index) => (
+              <Animatable.View 
+                key={review.id}
+                animation="fadeInUp" 
+                delay={index * 100}
+                style={styles.reviewCard}
+              >
+                <View style={styles.reviewHeader}>
+                  <View style={styles.reviewerInfo}>
+                    <View style={styles.reviewerAvatar}>
+                      <User size={16} color={COLORS.white} />
+                    </View>
+                    <Text style={styles.reviewerName}>{review.userName}</Text>
+                  </View>
+                  
+                  <View style={styles.reviewDate}>
+                    <Calendar size={12} color={COLORS.gray} />
+                    <Text style={styles.dateText}>{formatDate(review.date)}</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.reviewRating}>
+                  {renderStars(review.rating)}
+                </View>
+                
+                <Text style={styles.reviewText}>{review.comment}</Text>
+              </Animatable.View>
+            ))}
+            
+            {/* Message affiché s'il n'y a pas d'avis */}
+            {reviews.length === 0 && (
+              <View style={styles.noReviews}>
+                <MessageSquare size={48} color={COLORS.gray_light} />
+                <Text style={styles.noReviewsText}>
+                  {t('placeReviews.noReviews', "Pas encore d'avis. Soyez le premier à donner votre avis!")}
+                </Text>
+              </View>
+            )}
+          </View>
+          
+          <View style={styles.bottomPadding} />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
+
+// Styles pour l'interface utilisateur
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  keyboardAvoidView: {
+    flex: 1,
+  },
+  header: {
+    backgroundColor: COLORS.primary,
+    padding: SPACING.lg,
+    paddingTop: Platform.OS === 'android' ? SPACING.xl * 2 : SPACING.xl,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
+    marginTop: SPACING.sm,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: FONT_SIZE.xl,
+    fontWeight: FONT_WEIGHT.bold,
+    color: COLORS.white,
+    marginTop: SPACING.sm,
+  },
+  subtitle: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.white,
+    opacity: 0.8,
+    marginTop: 2,
+  },
+  content: {
+    flex: 1,
+  },
+  addReviewSection: {
+    backgroundColor: COLORS.white,
+    margin: SPACING.lg,
+    borderRadius: 16,
+    padding: SPACING.md,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZE.lg,
+    fontWeight: FONT_WEIGHT.bold,
+    marginBottom: SPACING.md,
+    color: COLORS.black,
+  },
+  ratingSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
+  },
+  starContainer: {
+    padding: 5,
+  },
+  reviewInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    borderWidth: 1,
+    borderColor: COLORS.light_gray,
+    borderRadius: 12,
+  },
+  reviewInput: {
+    flex: 1,
+    minHeight: 80,
+    maxHeight: 120,
+    padding: SPACING.md,
+    fontSize: FONT_SIZE.md,
+    color: COLORS.black,
+    textAlignVertical: 'top',
+  },
+  submitButton: {
+    backgroundColor: COLORS.primary,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: SPACING.sm,
+  },
+  submitButtonDisabled: {
+    backgroundColor: COLORS.gray_light,
+  },
+  reviewsListSection: {
+    padding: SPACING.lg,
+    paddingTop: 0,
+  },
+  reviewCount: {
+    color: COLORS.gray,
+    fontWeight: FONT_WEIGHT.normal,
+  },
+  reviewCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.light_gray,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  reviewerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reviewerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  reviewerName: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: FONT_WEIGHT.medium,
+    color: COLORS.black,
+  },
+  reviewDate: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.gray,
+    marginLeft: 4,
+  },
+  reviewRating: {
+    flexDirection: 'row',
+    marginBottom: SPACING.sm,
+  },
+  reviewText: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.gray,
+    lineHeight: 20,
+  },
+  noReviews: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.xl,
+  },
+  noReviewsText: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginTop: SPACING.md,
+  },
+  bottomPadding: {
+    height: 100,
+  },
+  highlight: {
+    color: COLORS.highlight,
+  }
+});
+
+export default PlaceReviewsScreen;
