@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -16,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import * as Icons from 'lucide-react-native'; // Import toutes les icônes pour éviter les problèmes
+import * as Icons from 'lucide-react-native'; 
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_SIZE, FONT_WEIGHT } from '../theme/typography';
@@ -174,6 +172,12 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
     ? { uri: place.images[0] } 
     : require('../../assets/icon.png');
 
+  // Check if entrance is free (all fees are 0)
+  const isEntryFree = place.entranceFee && 
+    place.entranceFee.adult === 0 && 
+    place.entranceFee.child === 0 && 
+    place.entranceFee.student === 0;
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary_dark} />
@@ -280,26 +284,33 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
               <Icons.Ticket size={20} color={COLORS.primary} />
               <Text style={styles.infoCardTitle}>{t('placeDetails.entranceFees', "Frais d'entrée")}</Text>
             </View>
-            <View style={styles.feesList}>
-              {place.entranceFee.adults !== undefined && (
-                <View style={styles.feeItem}>
-                  <Text style={styles.feeLabel}>{t('placeDetails.fees.adults', 'Adultes')}</Text>
-                  <Text style={styles.feeValue}>{place.entranceFee.adults} €</Text>
-                </View>
-              )}
-              {place.entranceFee.children !== undefined && (
-                <View style={styles.feeItem}>
-                  <Text style={styles.feeLabel}>{t('placeDetails.fees.children', 'Enfants')}</Text>
-                  <Text style={styles.feeValue}>{place.entranceFee.children} €</Text>
-                </View>
-              )}
-              {place.entranceFee.seniors !== undefined && (
-                <View style={styles.feeItem}>
-                  <Text style={styles.feeLabel}>{t('placeDetails.fees.seniors', 'Seniors')}</Text>
-                  <Text style={styles.feeValue}>{place.entranceFee.seniors} €</Text>
-                </View>
-              )}
-            </View>
+            
+            {isEntryFree ? (
+              <View style={styles.freeEntryContainer}>
+                <Text style={styles.freeEntryText}>{t('placeDetails.fees.free', 'Entrée Gratuite')}</Text>
+              </View>
+            ) : (
+              <View style={styles.feesList}>
+                {place.entranceFee.adult !== undefined && (
+                  <View style={styles.feeItem}>
+                    <Text style={styles.feeLabel}>{t('placeDetails.fees.adults', 'Adultes')}</Text>
+                    <Text style={styles.feeValue}>{place.entranceFee.adult} TND</Text>
+                  </View>
+                )}
+                {place.entranceFee.child !== undefined && (
+                  <View style={styles.feeItem}>
+                    <Text style={styles.feeLabel}>{t('placeDetails.fees.children', 'Enfants')}</Text>
+                    <Text style={styles.feeValue}>{place.entranceFee.child} TND</Text>
+                  </View>
+                )}
+                {place.entranceFee.student !== undefined && (
+                  <View style={styles.feeItem}>
+                    <Text style={styles.feeLabel}>{t('placeDetails.fees.students', 'Étudiants')}</Text>
+                    <Text style={styles.feeValue}>{place.entranceFee.student} TND</Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
         )}
         
@@ -553,6 +564,18 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     fontWeight: FONT_WEIGHT.medium,
     color: COLORS.primary,
+  },
+  freeEntryContainer: {
+    backgroundColor: COLORS.success + '20',
+    padding: SPACING.sm,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+  },
+  freeEntryText: {
+    color: COLORS.success,
+    fontWeight: FONT_WEIGHT.bold,
+    fontSize: FONT_SIZE.md,
   },
   gallerySection: {
     marginBottom: SPACING.lg,
