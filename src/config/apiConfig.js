@@ -31,6 +31,16 @@ export const ENDPOINTS = {
   PLACES_BY_PROVIDER: (providerId) => `/places/provider/${providerId}`, // Lieux par prestataire / Places by provider
   UPDATE_PLACE: (id) => `/places/${id}`, // Mettre à jour un lieu / Update place
   DELETE_PLACE: (id) => `/places/${id}`, // Supprimer un lieu / Delete place
+  
+  // Points de terminaison pour les avis
+  // Reviews endpoints
+  REVIEWS: '/reviews', // Tous les avis / All reviews
+  REVIEWS_BY_PLACE: (placeId) => `/reviews/place/${placeId}`, // Avis par lieu / Reviews by place
+  REVIEWS_BY_USER: (userId) => `/reviews/user/${userId}`, // Avis par utilisateur / Reviews by user
+  REVIEW_BY_ID: (id) => `/reviews/${id}`, // Obtenir un avis par ID / Get review by ID
+  ADD_REVIEW: '/reviews', // Ajouter un nouvel avis / Add new review
+  UPDATE_REVIEW: (id) => `/reviews/${id}`, // Mettre à jour un avis / Update review
+  DELETE_REVIEW: (id) => `/reviews/${id}`, // Supprimer un avis / Delete review
 };
 
 // Fonction utilitaire pour construire l'URL API complète (simplifiée)

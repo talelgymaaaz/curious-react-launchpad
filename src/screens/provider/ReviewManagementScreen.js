@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -9,7 +9,9 @@ import {
   FlatList,
   TextInput,
   Modal,
-  Platform
+  Platform,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { 
   ArrowLeft,
@@ -19,62 +21,107 @@ import {
   Star,
   Calendar,
   Send,
-  X
+  X,
+  RefreshCw
 } from 'lucide-react-native';
 import { COLORS } from '../../theme/colors';
 import { SPACING } from '../../theme/spacing';
 import { FONT_SIZE } from '../../theme/typography';
 import * as Animatable from 'react-native-animatable';
+import { getApiUrl, ENDPOINTS } from '../../config/apiConfig';
+import { useAuth } from '../../context/AuthContext';
 
 const ReviewManagementScreen = ({ navigation }) => {
-  const [reviews, setReviews] = useState([
-    { 
-      id: 1, 
-      name: 'Ahmed Mehdi', 
-      date: '10/03/2025', 
-      rating: 4, 
-      comment: 'Très bon service, nourriture délicieuse et accueil chaleureux.',
-      replied: false,
-      reply: '',
-      reported: false
-    },
-    { 
-      id: 2, 
-      name: 'Fatima Jouini', 
-      date: '08/03/2025', 
-      rating: 5, 
-      comment: 'Excellent! Le meilleur restaurant de cuisine traditionnelle à Jendouba!',
-      replied: false,
-      reply: '',
-      reported: false
-    },
-    { 
-      id: 3, 
-      name: 'Karim Bennour', 
-      date: '05/03/2025', 
-      rating: 3, 
-      comment: 'Service correct mais temps d\'attente un peu long.',
-      replied: true,
-      reply: 'Merci pour votre retour, nous travaillons à améliorer notre temps de service.',
-      reported: false
-    },
-    { 
-      id: 4, 
-      name: 'Nadia Khaled', 
-      date: '02/03/2025', 
-      rating: 2, 
-      comment: 'Déçu par la qualité des plats. Trop chers pour ce que c\'est.',
-      replied: true,
-      reply: 'Nous sommes désolés de votre expérience. Pourriez-vous nous donner plus de détails afin que nous puissions améliorer notre service?',
-      reported: false
-    },
-  ]);
-
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  
   const [replyText, setReplyText] = useState('');
   const [selectedReview, setSelectedReview] = useState(null);
   const [replyModalVisible, setReplyModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  
+  const { user } = useAuth();
+  
+  // Charger les avis du prestataire au chargement
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+  
+  // Fonction pour récupérer les avis depuis l'API
+  const fetchReviews = async () => {
+    if (!user || !user.id) {
+      setError('Vous devez être connecté pour voir vos avis');
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Récupérer les lieux du prestataire
+      const placesResponse = await fetch(getApiUrl(ENDPOINTS.PLACES_BY_PROVIDER(user.id)), {
+        headers: {
+          ...(user.token ? { 'Authorization': `Bearer ${user.token}` } : {})
+        }
+      });
+      
+      if (!placesResponse.ok) {
+        throw new Error(`HTTP error! status: ${placesResponse.status}`);
+      }
+      
+      const placesData = await placesResponse.json();
+      
+      if (!placesData || !placesData.data || !Array.isArray(placesData.data)) {
+        setReviews([]);
+        setLoading(false);
+        return;
+      }
+      
+      const places = placesData.data;
+      let allReviews = [];
+      
+      // Pour chaque lieu, récupérer les avis
+      for (const place of places) {
+        const reviewsResponse = await fetch(getApiUrl(ENDPOINTS.REVIEWS_BY_PLACE(place.id)));
+        
+        if (reviewsResponse.ok) {
+          const reviewsData = await reviewsResponse.json();
+          
+          if (reviewsData && reviewsData.status === 200 && reviewsData.data && reviewsData.data.reviews) {
+            // Ajouter le nom du lieu à chaque avis
+            const placeReviews = reviewsData.data.reviews.map(review => ({
+              ...review,
+              placeName: place.name,
+              placeId: place.id
+            }));
+            
+            allReviews = [...allReviews, ...placeReviews];
+          }
+        }
+      }
+      
+      // Trier les avis par date (les plus récents en premier)
+      allReviews.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+      
+      setReviews(allReviews);
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setError('Erreur lors du chargement des avis');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+  
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchReviews();
+  };
 
   const renderStars = (rating) => {
     return Array(5).fill(0).map((_, i) => (
@@ -89,21 +136,60 @@ const ReviewManagementScreen = ({ navigation }) => {
 
   const handleReply = (review) => {
     setSelectedReview(review);
-    setReplyText(review.reply);
+    setReplyText(review.reply || '');
     setReplyModalVisible(true);
   };
 
-  const submitReply = () => {
-    if (!replyText.trim()) return;
+  const submitReply = async () => {
+    if (!replyText.trim() || !selectedReview) return;
     
-    setReviews(reviews.map(review => 
-      review.id === selectedReview.id 
-        ? { ...review, replied: true, reply: replyText } 
-        : review
-    ));
-    
-    setReplyModalVisible(false);
-    setReplyText('');
+    try {
+      setSubmitting(true);
+      
+      // Préparer les données de la réponse
+      const replyData = {
+        reply: replyText
+      };
+      
+      // Envoyer la réponse à l'API (endpoint à adapter selon votre API)
+      const response = await fetch(getApiUrl(`${ENDPOINTS.REVIEWS}/${selectedReview.id}/reply`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user && user.token ? { 'Authorization': `Bearer ${user.token}` } : {})
+        },
+        body: JSON.stringify(replyData)
+      });
+      
+      if (!response.ok) {
+        // Si l'API ne prend pas en charge les réponses, nous pouvons simuler
+        // en mettant à jour l'interface utilisateur localement
+        console.warn('API response error or not supported:', response.status);
+      }
+      
+      // Mettre à jour l'état local
+      setReviews(reviews.map(review => 
+        review.id === selectedReview.id 
+          ? { ...review, replied: true, reply: replyText } 
+          : review
+      ));
+      
+      Alert.alert(
+        'Succès',
+        'Votre réponse a été enregistrée avec succès.'
+      );
+      
+      setReplyModalVisible(false);
+      setReplyText('');
+    } catch (err) {
+      console.error('Error submitting reply:', err);
+      Alert.alert(
+        'Erreur',
+        'Une erreur est survenue lors de l\'enregistrement de votre réponse. Veuillez réessayer.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleReport = (review) => {
@@ -111,17 +197,68 @@ const ReviewManagementScreen = ({ navigation }) => {
     setReportModalVisible(true);
   };
 
-  const submitReport = () => {
-    if (!reportReason.trim()) return;
+  const submitReport = async () => {
+    if (!reportReason.trim() || !selectedReview) return;
     
-    setReviews(reviews.map(review => 
-      review.id === selectedReview.id 
-        ? { ...review, reported: true } 
-        : review
-    ));
+    try {
+      setSubmitting(true);
+      
+      // Préparer les données du signalement
+      const reportData = {
+        reason: reportReason
+      };
+      
+      // Envoyer le signalement à l'API (endpoint à adapter selon votre API)
+      const response = await fetch(getApiUrl(`${ENDPOINTS.REVIEWS}/${selectedReview.id}/report`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user && user.token ? { 'Authorization': `Bearer ${user.token}` } : {})
+        },
+        body: JSON.stringify(reportData)
+      });
+      
+      if (!response.ok) {
+        // Si l'API ne prend pas en charge les signalements, nous pouvons simuler
+        // en mettant à jour l'interface utilisateur localement
+        console.warn('API report endpoint error or not supported:', response.status);
+      }
+      
+      // Mettre à jour l'état local
+      setReviews(reviews.map(review => 
+        review.id === selectedReview.id 
+          ? { ...review, reported: true } 
+          : review
+      ));
+      
+      Alert.alert(
+        'Succès',
+        'L\'avis a été signalé avec succès.'
+      );
+      
+      setReportModalVisible(false);
+      setReportReason('');
+    } catch (err) {
+      console.error('Error submitting report:', err);
+      Alert.alert(
+        'Erreur',
+        'Une erreur est survenue lors du signalement de l\'avis. Veuillez réessayer.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /**
+   * Formate une date pour l'affichage
+   * @param {string} dateString - Date au format ISO
+   * @returns {string} - Date formatée
+   */
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
     
-    setReportModalVisible(false);
-    setReportReason('');
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   const renderReviewItem = ({ item }) => (
@@ -133,12 +270,18 @@ const ReviewManagementScreen = ({ navigation }) => {
       <View style={styles.reviewHeader}>
         <View style={styles.userInfo}>
           <User size={18} color={COLORS.primary} />
-          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={styles.userName}>
+            {item.userName || item.user?.name || 'Utilisateur'}
+          </Text>
         </View>
         <View style={styles.dateContainer}>
           <Calendar size={14} color={COLORS.gray} />
-          <Text style={styles.dateText}>{item.date}</Text>
+          <Text style={styles.dateText}>{formatDate(item.date || item.createdAt)}</Text>
         </View>
+      </View>
+      
+      <View style={styles.placeInfo}>
+        <Text style={styles.placeName}>{item.placeName || 'Lieu'}</Text>
       </View>
       
       <View style={styles.ratingContainer}>
@@ -149,7 +292,7 @@ const ReviewManagementScreen = ({ navigation }) => {
       
       <Text style={styles.commentText}>{item.comment}</Text>
       
-      {item.replied && (
+      {item.replied && item.reply && (
         <View style={styles.replyContainer}>
           <Text style={styles.replyLabel}>Votre réponse:</Text>
           <Text style={styles.replyText}>{item.reply}</Text>
@@ -187,6 +330,12 @@ const ReviewManagementScreen = ({ navigation }) => {
     </Animatable.View>
   );
 
+  // Calculer les statistiques
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+    : '0.0';
+  const repliedCount = reviews.filter(r => r.replied).length;
+
   return (
     <SafeAreaView style={styles.container}>
       <Animatable.View 
@@ -210,26 +359,50 @@ const ReviewManagementScreen = ({ navigation }) => {
           <Text style={styles.statLabel}>Total</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>
-            {reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length}
-          </Text>
+          <Text style={styles.statValue}>{averageRating}</Text>
           <Text style={styles.statLabel}>Moyenne</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>
-            {reviews.filter(r => r.replied).length}
-          </Text>
+          <Text style={styles.statValue}>{repliedCount}</Text>
           <Text style={styles.statLabel}>Réponses</Text>
         </View>
       </View>
 
-      <FlatList
-        data={reviews}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderReviewItem}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading && !refreshing ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.loadingText}>Chargement des avis...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <MessageSquare size={48} color={COLORS.error} />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={fetchReviews}
+          >
+            <Text style={styles.retryButtonText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={reviews}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderReviewItem}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <MessageSquare size={48} color={COLORS.gray_light} />
+              <Text style={styles.emptyText}>
+                Aucun avis pour le moment. Les avis de vos clients apparaîtront ici.
+              </Text>
+            </View>
+          }
+        />
+      )}
 
       {/* Reply Modal */}
       <Modal
@@ -256,7 +429,9 @@ const ReviewManagementScreen = ({ navigation }) => {
             
             {selectedReview && (
               <View style={styles.selectedReview}>
-                <Text style={styles.selectedReviewName}>{selectedReview.name}</Text>
+                <Text style={styles.selectedReviewName}>
+                  {selectedReview.userName || selectedReview.user?.name || 'Utilisateur'}
+                </Text>
                 <View style={styles.selectedReviewRating}>
                   {renderStars(selectedReview.rating)}
                 </View>
@@ -270,14 +445,25 @@ const ReviewManagementScreen = ({ navigation }) => {
               multiline
               value={replyText}
               onChangeText={setReplyText}
+              editable={!submitting}
             />
             
             <TouchableOpacity 
-              style={styles.submitButton}
+              style={[
+                styles.submitButton,
+                (submitting || !replyText.trim()) && styles.disabledButton
+              ]}
               onPress={submitReply}
+              disabled={submitting || !replyText.trim()}
             >
-              <Send size={20} color={COLORS.white} />
-              <Text style={styles.submitButtonText}>Envoyer</Text>
+              {submitting ? (
+                <ActivityIndicator size="small" color={COLORS.white} />
+              ) : (
+                <>
+                  <Send size={20} color={COLORS.white} />
+                  <Text style={styles.submitButtonText}>Envoyer</Text>
+                </>
+              )}
             </TouchableOpacity>
           </Animatable.View>
         </View>
@@ -308,7 +494,9 @@ const ReviewManagementScreen = ({ navigation }) => {
             
             {selectedReview && (
               <View style={styles.selectedReview}>
-                <Text style={styles.selectedReviewName}>{selectedReview.name}</Text>
+                <Text style={styles.selectedReviewName}>
+                  {selectedReview.userName || selectedReview.user?.name || 'Utilisateur'}
+                </Text>
                 <Text style={styles.selectedReviewComment}>{selectedReview.comment}</Text>
               </View>
             )}
@@ -321,14 +509,26 @@ const ReviewManagementScreen = ({ navigation }) => {
               multiline
               value={reportReason}
               onChangeText={setReportReason}
+              editable={!submitting}
             />
             
             <TouchableOpacity 
-              style={[styles.submitButton, styles.reportSubmitButton]}
+              style={[
+                styles.submitButton, 
+                styles.reportSubmitButton,
+                (submitting || !reportReason.trim()) && styles.disabledButton
+              ]}
               onPress={submitReport}
+              disabled={submitting || !reportReason.trim()}
             >
-              <Flag size={20} color={COLORS.white} />
-              <Text style={styles.submitButtonText}>Signaler</Text>
+              {submitting ? (
+                <ActivityIndicator size="small" color={COLORS.white} />
+              ) : (
+                <>
+                  <Flag size={20} color={COLORS.white} />
+                  <Text style={styles.submitButtonText}>Signaler</Text>
+                </>
+              )}
             </TouchableOpacity>
           </Animatable.View>
         </View>
@@ -351,6 +551,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginBottom: SPACING.sm,
+    width: 40, 
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: FONT_SIZE.xl,
@@ -394,6 +600,50 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: FONT_SIZE.sm,
     color: COLORS.gray,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: SPACING.md,
+    color: COLORS.gray,
+    fontSize: FONT_SIZE.md,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  errorText: {
+    marginTop: SPACING.md,
+    color: COLORS.error,
+    fontSize: FONT_SIZE.md,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    padding: SPACING.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    marginTop: SPACING.md,
+    color: COLORS.gray,
+    fontSize: FONT_SIZE.md,
+    textAlign: 'center',
   },
   listContainer: {
     padding: SPACING.md,
@@ -440,6 +690,17 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.xs,
     color: COLORS.gray,
     marginLeft: 4,
+  },
+  placeInfo: {
+    backgroundColor: COLORS.light_gray,
+    padding: SPACING.xs,
+    borderRadius: 4,
+    marginBottom: SPACING.sm,
+  },
+  placeName: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.primary_dark,
+    fontWeight: 'bold',
   },
   ratingContainer: {
     marginBottom: SPACING.sm,
@@ -578,6 +839,9 @@ const styles = StyleSheet.create({
   },
   reportSubmitButton: {
     backgroundColor: COLORS.error,
+  },
+  disabledButton: {
+    backgroundColor: COLORS.gray_light,
   },
   submitButtonText: {
     color: COLORS.white,

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -10,7 +10,9 @@ import {
   Platform, 
   StatusBar, 
   TextInput,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +28,8 @@ import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_SIZE, FONT_WEIGHT } from '../theme/typography';
 import * as Animatable from 'react-native-animatable';
+import { getApiUrl, ENDPOINTS } from '../config/apiConfig';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Écran des avis sur un lieu
@@ -38,38 +42,51 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
   const { placeId, placeName } = route.params || {};
   const [reviewText, setReviewText] = useState('');
   const [userRating, setUserRating] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [avgRating, setAvgRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const { user } = useAuth();
   
-  // Données d'exemple des avis (à remplacer par une API dans une application réelle)
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      userName: 'Ahmed Mehdi',
-      date: '2025-04-08',
-      rating: 4,
-      comment: 'Très bon service, nourriture délicieuse et accueil chaleureux.'
-    },
-    {
-      id: 2,
-      userName: 'Fatima Jouini',
-      date: '2025-04-05',
-      rating: 5,
-      comment: 'Excellent! Je recommande vivement cet endroit à tous mes amis!'
-    },
-    {
-      id: 3,
-      userName: 'Karim Bennour',
-      date: '2025-04-01',
-      rating: 3,
-      comment: 'Service correct mais temps d\'attente un peu long.'
-    },
-    {
-      id: 4,
-      userName: 'Nadia Khaled',
-      date: '2025-03-25',
-      rating: 2,
-      comment: 'Déçu par la qualité. J\'espère qu\'ils amélioreront leur service.'
+  // Charger les avis depuis l'API
+  useEffect(() => {
+    fetchReviews();
+  }, [placeId]);
+
+  /**
+   * Récupère les avis pour ce lieu depuis l'API
+   */
+  const fetchReviews = async () => {
+    if (!placeId) {
+      setError(t('placeReviews.errors.missingPlaceId', 'Identifiant du lieu manquant'));
+      setLoading(false);
+      return;
     }
-  ]);
+    
+    try {
+      setLoading(true);
+      const response = await fetch(getApiUrl(ENDPOINTS.REVIEWS_BY_PLACE(placeId)));
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.status === 200) {
+        setReviews(data.data.reviews || []);
+        setAvgRating(data.data.average_rating || 0);
+      } else {
+        setError(t('placeReviews.errors.loadFailed', 'Échec du chargement des avis'));
+      }
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setError(t('placeReviews.errors.loadFailed', 'Échec du chargement des avis'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Gère la sélection d'une note
@@ -82,25 +99,90 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
   /**
    * Soumet un nouvel avis
    */
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (reviewText.trim() === '' || userRating === 0) {
-      // Afficher un message d'erreur ou de validation
+      Alert.alert(
+        t('placeReviews.errors.validationTitle', 'Validation'),
+        t('placeReviews.errors.validationMessage', 'Veuillez entrer un commentaire et une note')
+      );
       return;
     }
 
-    // Crée un nouvel avis
-    const newReview = {
-      id: reviews.length + 1,
-      userName: 'Vous', // Dans une application réelle, utiliserait le nom de l'utilisateur connecté
-      date: new Date().toISOString().split('T')[0],
-      rating: userRating,
-      comment: reviewText
-    };
+    if (!user || !user.id) {
+      Alert.alert(
+        t('placeReviews.errors.authTitle', 'Authentification requise'),
+        t('placeReviews.errors.authMessage', 'Vous devez être connecté pour laisser un avis'),
+        [
+          { 
+            text: t('placeReviews.login', 'Se connecter'), 
+            onPress: () => navigation.navigate('Login')
+          },
+          { 
+            text: t('common.cancel', 'Annuler'),
+            style: 'cancel'
+          }
+        ]
+      );
+      return;
+    }
 
-    // Ajoute le nouvel avis au début de la liste
-    setReviews([newReview, ...reviews]);
-    setReviewText('');
-    setUserRating(0);
+    try {
+      setSubmitting(true);
+      
+      // Préparer les données de l'avis
+      const reviewData = {
+        placeId: placeId,
+        rating: userRating,
+        comment: reviewText
+      };
+      
+      // Si l'utilisateur est connecté, l'API prendra l'ID utilisateur depuis le token
+      // Sinon, on peut ajouter l'ID utilisateur ici si disponible
+      if (user && user.id) {
+        reviewData.userId = user.id;
+      }
+      
+      // Envoyer l'avis à l'API
+      const response = await fetch(getApiUrl(ENDPOINTS.ADD_REVIEW), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Ajouter le token d'authentification si disponible
+          ...(user && user.token ? { 'Authorization': `Bearer ${user.token}` } : {})
+        },
+        body: JSON.stringify(reviewData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.status === 201) {
+        // Réinitialiser le formulaire
+        setReviewText('');
+        setUserRating(0);
+        
+        // Rafraîchir la liste des avis
+        fetchReviews();
+        
+        Alert.alert(
+          t('placeReviews.success.title', 'Succès'),
+          t('placeReviews.success.message', 'Votre avis a été publié avec succès!')
+        );
+      } else {
+        throw new Error('Échec de la publication');
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      Alert.alert(
+        t('placeReviews.errors.submitTitle', 'Erreur'),
+        t('placeReviews.errors.submitMessage', 'Une erreur est survenue lors de la publication de votre avis. Veuillez réessayer.')
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /**
@@ -151,6 +233,9 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
         <View style={styles.headerContent}>
           <Text style={styles.title}>
             {t('placeReviews.title', 'Avis')}
+            {avgRating > 0 && (
+              <Text style={styles.ratingText}> ({avgRating.toFixed(1)}★)</Text>
+            )}
           </Text>
           <Text style={styles.subtitle}>
             {placeName || t('placeReviews.place', 'Lieu')}
@@ -190,18 +275,24 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
                 value={reviewText}
                 onChangeText={setReviewText}
                 placeholderTextColor={COLORS.gray}
+                editable={!submitting}
               />
               
               {/* Bouton d'envoi */}
               <TouchableOpacity 
                 style={[
                   styles.submitButton,
-                  (reviewText.trim() === '' || userRating === 0) && styles.submitButtonDisabled
+                  (reviewText.trim() === '' || userRating === 0 || submitting) 
+                    && styles.submitButtonDisabled
                 ]}
                 onPress={handleSubmitReview}
-                disabled={reviewText.trim() === '' || userRating === 0}
+                disabled={reviewText.trim() === '' || userRating === 0 || submitting}
               >
-                <Send size={20} color={COLORS.white} />
+                {submitting ? (
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                ) : (
+                  <Send size={20} color={COLORS.white} />
+                )}
               </TouchableOpacity>
             </View>
           </Animatable.View>
@@ -213,38 +304,64 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
               <Text style={styles.reviewCount}> ({reviews.length})</Text>
             </Text>
             
-            {/* Affichage de tous les avis */}
-            {reviews.map((review, index) => (
-              <Animatable.View 
-                key={review.id}
-                animation="fadeInUp" 
-                delay={index * 100}
-                style={styles.reviewCard}
-              >
-                <View style={styles.reviewHeader}>
-                  <View style={styles.reviewerInfo}>
-                    <View style={styles.reviewerAvatar}>
-                      <User size={16} color={COLORS.white} />
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loadingText}>
+                  {t('placeReviews.loading', 'Chargement des avis...')}
+                </Text>
+              </View>
+            ) : error ? (
+              <View style={styles.errorContainer}>
+                <MessageSquare size={48} color={COLORS.error} />
+                <Text style={styles.errorText}>{error}</Text>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={fetchReviews}
+                >
+                  <Text style={styles.retryButtonText}>
+                    {t('common.retry', 'Réessayer')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              /* Affichage de tous les avis */
+              reviews.map((review, index) => (
+                <Animatable.View 
+                  key={review.id}
+                  animation="fadeInUp" 
+                  delay={index * 100}
+                  style={styles.reviewCard}
+                >
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.reviewerInfo}>
+                      <View style={styles.reviewerAvatar}>
+                        <User size={16} color={COLORS.white} />
+                      </View>
+                      <Text style={styles.reviewerName}>
+                        {review.userName || review.user?.name || t('placeReviews.anonymousUser', 'Utilisateur')}
+                      </Text>
                     </View>
-                    <Text style={styles.reviewerName}>{review.userName}</Text>
+                    
+                    <View style={styles.reviewDate}>
+                      <Calendar size={12} color={COLORS.gray} />
+                      <Text style={styles.dateText}>
+                        {formatDate(review.date || review.createdAt)}
+                      </Text>
+                    </View>
                   </View>
                   
-                  <View style={styles.reviewDate}>
-                    <Calendar size={12} color={COLORS.gray} />
-                    <Text style={styles.dateText}>{formatDate(review.date)}</Text>
+                  <View style={styles.reviewRating}>
+                    {renderStars(review.rating)}
                   </View>
-                </View>
-                
-                <View style={styles.reviewRating}>
-                  {renderStars(review.rating)}
-                </View>
-                
-                <Text style={styles.reviewText}>{review.comment}</Text>
-              </Animatable.View>
-            ))}
+                  
+                  <Text style={styles.reviewText}>{review.comment}</Text>
+                </Animatable.View>
+              ))
+            )}
             
             {/* Message affiché s'il n'y a pas d'avis */}
-            {reviews.length === 0 && (
+            {!loading && !error && reviews.length === 0 && (
               <View style={styles.noReviews}>
                 <MessageSquare size={48} color={COLORS.gray_light} />
                 <Text style={styles.noReviewsText}>
@@ -299,6 +416,11 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     opacity: 0.8,
     marginTop: 2,
+  },
+  ratingText: {
+    fontSize: FONT_SIZE.lg,
+    color: COLORS.white,
+    fontWeight: FONT_WEIGHT.bold,
   },
   content: {
     flex: 1,
@@ -420,6 +542,38 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     color: COLORS.gray,
     lineHeight: 20,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.xl,
+  },
+  loadingText: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.gray,
+    marginTop: SPACING.md,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.xl,
+  },
+  errorText: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.error,
+    textAlign: 'center',
+    marginTop: SPACING.md,
+  },
+  retryButton: {
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontWeight: FONT_WEIGHT.medium,
   },
   noReviews: {
     alignItems: 'center',
