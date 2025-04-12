@@ -75,18 +75,38 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
       }
       
       const data = await response.json();
+      console.log("API Response:", JSON.stringify(data, null, 2));
       
       if (data && data.status === 200) {
-        // Ensure reviews is always an array
-        const reviewsData = data.data || [];
-        setReviews(Array.isArray(reviewsData) ? reviewsData : []);
-        
-        // Calculate average rating
-        if (Array.isArray(reviewsData) && reviewsData.length > 0) {
-          const totalRating = reviewsData.reduce((sum, review) => sum + parseFloat(review.rating), 0);
-          setAvgRating(totalRating / reviewsData.length);
+        // Handle the new nested structure where reviews are in data.data.reviews
+        if (data.data && data.data.reviews) {
+          setReviews(Array.isArray(data.data.reviews) ? data.data.reviews : []);
+          
+          // Use the provided average rating if available
+          if (data.data.averageRating) {
+            setAvgRating(parseFloat(data.data.averageRating));
+          } else {
+            // Calculate average rating as fallback
+            const reviewsArray = data.data.reviews;
+            if (Array.isArray(reviewsArray) && reviewsArray.length > 0) {
+              const totalRating = reviewsArray.reduce((sum, review) => sum + parseFloat(review.rating), 0);
+              setAvgRating(totalRating / reviewsArray.length);
+            } else {
+              setAvgRating(0);
+            }
+          }
         } else {
-          setAvgRating(0);
+          // Fallback to old structure
+          const reviewsData = data.data || [];
+          setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+          
+          // Calculate average rating
+          if (Array.isArray(reviewsData) && reviewsData.length > 0) {
+            const totalRating = reviewsData.reduce((sum, review) => sum + parseFloat(review.rating), 0);
+            setAvgRating(totalRating / reviewsData.length);
+          } else {
+            setAvgRating(0);
+          }
         }
       } else {
         setError(t('placeReviews.errors.loadFailed', 'Échec du chargement des avis'));
@@ -424,10 +444,10 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
               </View>
             ) : (
               /* Affichage de tous les avis */
-              reviews.length > 0 ? (
+              Array.isArray(reviews) && reviews.length > 0 ? (
                 reviews.map((review, index) => (
                   <Animatable.View 
-                    key={review.id}
+                    key={review.id || index}
                     animation="fadeInUp" 
                     delay={index * 100}
                     style={styles.reviewCard}
