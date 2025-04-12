@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -22,7 +21,8 @@ import {
   User,
   Calendar,
   MessageSquare,
-  Send
+  Send,
+  Trash2
 } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
@@ -47,6 +47,7 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
   const [error, setError] = useState(null);
   const [avgRating, setAvgRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { user } = useAuth();
   
   // Charger les avis depuis l'API
@@ -75,8 +76,16 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
       const data = await response.json();
       
       if (data && data.status === 200) {
-        setReviews(data.data.reviews || []);
-        setAvgRating(data.data.average_rating || 0);
+        setReviews(data.data || []);
+        // Calculate average rating if it's not provided directly
+        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          const totalRating = data.data.reduce((sum, review) => sum + parseFloat(review.rating), 0);
+          setAvgRating(totalRating / data.data.length);
+        } else if (data.data && data.data.average_rating) {
+          setAvgRating(data.data.average_rating);
+        } else {
+          setAvgRating(0);
+        }
       } else {
         setError(t('placeReviews.errors.loadFailed', 'Échec du chargement des avis'));
       }
@@ -186,6 +195,67 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
   };
 
   /**
+   * Supprime un avis
+   * @param {number} reviewId - L'ID de l'avis à supprimer
+   */
+  const handleDeleteReview = async (reviewId) => {
+    if (!user || !user.id) {
+      Alert.alert(
+        t('placeReviews.errors.authTitle', 'Authentification requise'),
+        t('placeReviews.errors.authMessage', 'Vous devez être connecté pour supprimer un avis')
+      );
+      return;
+    }
+
+    Alert.alert(
+      t('placeReviews.deleteConfirm.title', 'Confirmation'),
+      t('placeReviews.deleteConfirm.message', 'Êtes-vous sûr de vouloir supprimer cet avis ?'),
+      [
+        {
+          text: t('common.cancel', 'Annuler'),
+          style: 'cancel'
+        },
+        {
+          text: t('common.confirm', 'Confirmer'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              
+              const response = await fetch(getApiUrl(ENDPOINTS.DELETE_REVIEW(reviewId)), {
+                method: 'DELETE',
+                headers: {
+                  ...(user && user.token ? { 'Authorization': `Bearer ${user.token}` } : {})
+                }
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              // Rafraîchir la liste des avis
+              fetchReviews();
+              
+              Alert.alert(
+                t('placeReviews.deleteSuccess.title', 'Succès'),
+                t('placeReviews.deleteSuccess.message', 'Votre avis a été supprimé avec succès!')
+              );
+            } catch (err) {
+              console.error('Error deleting review:', err);
+              Alert.alert(
+                t('placeReviews.errors.deleteTitle', 'Erreur'),
+                t('placeReviews.errors.deleteMessage', 'Une erreur est survenue lors de la suppression de votre avis. Veuillez réessayer.')
+              );
+            } finally {
+              setDeleting(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  /**
    * Formate une date pour l'affichage
    * @param {string} dateString - Date au format ISO
    * @returns {string} - Date formatée
@@ -193,6 +263,15 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  /**
+   * Vérifie si l'utilisateur actuel est l'auteur de l'avis
+   * @param {Object} review - L'avis à vérifier
+   * @returns {boolean} - Vrai si l'utilisateur actuel est l'auteur
+   */
+  const isReviewOwner = (review) => {
+    return user && user.id && review.userId === user.id;
   };
 
   /**
@@ -216,6 +295,23 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
         />
       </TouchableOpacity>
     ));
+  };
+
+  /**
+   * Formate le nom complet d'un utilisateur
+   * @param {Object} review - L'avis contenant les infos utilisateur
+   * @returns {string} - Nom complet formaté
+   */
+  const formatUserName = (review) => {
+    if (review.firstName && review.lastName) {
+      return `${review.firstName} ${review.lastName}`;
+    } else if (review.userName) {
+      return review.userName;
+    } else if (review.user && review.user.name) {
+      return review.user.name;
+    } else {
+      return t('placeReviews.anonymousUser', 'Utilisateur');
+    }
   };
 
   return (
@@ -339,7 +435,7 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
                         <User size={16} color={COLORS.white} />
                       </View>
                       <Text style={styles.reviewerName}>
-                        {review.userName || review.user?.name || t('placeReviews.anonymousUser', 'Utilisateur')}
+                        {formatUserName(review)}
                       </Text>
                     </View>
                     
@@ -352,10 +448,31 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
                   </View>
                   
                   <View style={styles.reviewRating}>
-                    {renderStars(review.rating)}
+                    {renderStars(parseFloat(review.rating))}
                   </View>
                   
                   <Text style={styles.reviewText}>{review.comment}</Text>
+                  
+                  {isReviewOwner(review) && (
+                    <View style={styles.reviewActions}>
+                      <TouchableOpacity 
+                        style={styles.deleteButton}
+                        onPress={() => handleDeleteReview(review.id)}
+                        disabled={deleting}
+                      >
+                        {deleting ? (
+                          <ActivityIndicator size="small" color={COLORS.error} />
+                        ) : (
+                          <>
+                            <Trash2 size={16} color={COLORS.error} />
+                            <Text style={styles.deleteButtonText}>
+                              {t('placeReviews.deleteReview', 'Supprimer')}
+                            </Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </Animatable.View>
               ))
             )}
@@ -380,6 +497,25 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
 
 // Styles pour l'interface utilisateur
 const styles = StyleSheet.create({
+  reviewActions: {
+    marginTop: SPACING.sm,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+  },
+  deleteButtonText: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.error,
+    marginLeft: 4,
+    fontWeight: FONT_WEIGHT.medium,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
