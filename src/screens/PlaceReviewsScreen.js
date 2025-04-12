@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -76,13 +77,14 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
       const data = await response.json();
       
       if (data && data.status === 200) {
-        setReviews(data.data || []);
-        // Calculate average rating if it's not provided directly
-        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-          const totalRating = data.data.reduce((sum, review) => sum + parseFloat(review.rating), 0);
-          setAvgRating(totalRating / data.data.length);
-        } else if (data.data && data.data.average_rating) {
-          setAvgRating(data.data.average_rating);
+        // Ensure reviews is always an array
+        const reviewsData = data.data || [];
+        setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+        
+        // Calculate average rating
+        if (Array.isArray(reviewsData) && reviewsData.length > 0) {
+          const totalRating = reviewsData.reduce((sum, review) => sum + parseFloat(review.rating), 0);
+          setAvgRating(totalRating / reviewsData.length);
         } else {
           setAvgRating(0);
         }
@@ -422,69 +424,68 @@ const PlaceReviewsScreen = ({ route, navigation }) => {
               </View>
             ) : (
               /* Affichage de tous les avis */
-              reviews.map((review, index) => (
-                <Animatable.View 
-                  key={review.id}
-                  animation="fadeInUp" 
-                  delay={index * 100}
-                  style={styles.reviewCard}
-                >
-                  <View style={styles.reviewHeader}>
-                    <View style={styles.reviewerInfo}>
-                      <View style={styles.reviewerAvatar}>
-                        <User size={16} color={COLORS.white} />
+              reviews.length > 0 ? (
+                reviews.map((review, index) => (
+                  <Animatable.View 
+                    key={review.id}
+                    animation="fadeInUp" 
+                    delay={index * 100}
+                    style={styles.reviewCard}
+                  >
+                    <View style={styles.reviewHeader}>
+                      <View style={styles.reviewerInfo}>
+                        <View style={styles.reviewerAvatar}>
+                          <User size={16} color={COLORS.white} />
+                        </View>
+                        <Text style={styles.reviewerName}>
+                          {formatUserName(review)}
+                        </Text>
                       </View>
-                      <Text style={styles.reviewerName}>
-                        {formatUserName(review)}
-                      </Text>
+                      
+                      <View style={styles.reviewDate}>
+                        <Calendar size={12} color={COLORS.gray} />
+                        <Text style={styles.dateText}>
+                          {formatDate(review.createdAt || review.date)}
+                        </Text>
+                      </View>
                     </View>
                     
-                    <View style={styles.reviewDate}>
-                      <Calendar size={12} color={COLORS.gray} />
-                      <Text style={styles.dateText}>
-                        {formatDate(review.date || review.createdAt)}
-                      </Text>
+                    <View style={styles.reviewRating}>
+                      {renderStars(parseFloat(review.rating))}
                     </View>
-                  </View>
-                  
-                  <View style={styles.reviewRating}>
-                    {renderStars(parseFloat(review.rating))}
-                  </View>
-                  
-                  <Text style={styles.reviewText}>{review.comment}</Text>
-                  
-                  {isReviewOwner(review) && (
-                    <View style={styles.reviewActions}>
-                      <TouchableOpacity 
-                        style={styles.deleteButton}
-                        onPress={() => handleDeleteReview(review.id)}
-                        disabled={deleting}
-                      >
-                        {deleting ? (
-                          <ActivityIndicator size="small" color={COLORS.error} />
-                        ) : (
-                          <>
-                            <Trash2 size={16} color={COLORS.error} />
-                            <Text style={styles.deleteButtonText}>
-                              {t('placeReviews.deleteReview', 'Supprimer')}
-                            </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </Animatable.View>
-              ))
-            )}
-            
-            {/* Message affiché s'il n'y a pas d'avis */}
-            {!loading && !error && reviews.length === 0 && (
-              <View style={styles.noReviews}>
-                <MessageSquare size={48} color={COLORS.gray_light} />
-                <Text style={styles.noReviewsText}>
-                  {t('placeReviews.noReviews', "Pas encore d'avis. Soyez le premier à donner votre avis!")}
-                </Text>
-              </View>
+                    
+                    <Text style={styles.reviewText}>{review.comment}</Text>
+                    
+                    {isReviewOwner(review) && (
+                      <View style={styles.reviewActions}>
+                        <TouchableOpacity 
+                          style={styles.deleteButton}
+                          onPress={() => handleDeleteReview(review.id)}
+                          disabled={deleting}
+                        >
+                          {deleting ? (
+                            <ActivityIndicator size="small" color={COLORS.error} />
+                          ) : (
+                            <>
+                              <Trash2 size={16} color={COLORS.error} />
+                              <Text style={styles.deleteButtonText}>
+                                {t('placeReviews.deleteReview', 'Supprimer')}
+                              </Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </Animatable.View>
+                ))
+              ) : (
+                <View style={styles.noReviews}>
+                  <MessageSquare size={48} color={COLORS.gray_light} />
+                  <Text style={styles.noReviewsText}>
+                    {t('placeReviews.noReviews', "Pas encore d'avis. Soyez le premier à donner votre avis!")}
+                  </Text>
+                </View>
+              )
             )}
           </View>
           

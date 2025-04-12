@@ -92,15 +92,18 @@ const ReviewManagementScreen = ({ navigation }) => {
         if (reviewsResponse.ok) {
           const reviewsData = await reviewsResponse.json();
           
-          if (reviewsData && reviewsData.status === 200 && reviewsData.data && reviewsData.data.reviews) {
+          if (reviewsData && reviewsData.status === 200) {
+            // Ensure we're handling the data array correctly
+            const placeReviews = Array.isArray(reviewsData.data) ? reviewsData.data : [];
+            
             // Ajouter le nom du lieu à chaque avis
-            const placeReviews = reviewsData.data.reviews.map(review => ({
+            const formattedReviews = placeReviews.map(review => ({
               ...review,
-              placeName: place.name,
+              placeName: place.name || 'Lieu sans nom',
               placeId: place.id
             }));
             
-            allReviews = [...allReviews, ...placeReviews];
+            allReviews = [...allReviews, ...formattedReviews];
           }
         }
       }
@@ -261,6 +264,23 @@ const ReviewManagementScreen = ({ navigation }) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  /**
+   * Formate le nom complet d'un utilisateur
+   * @param {Object} review - L'avis contenant les infos utilisateur
+   * @returns {string} - Nom complet formaté
+   */
+  const formatUserName = (review) => {
+    if (review.firstName && review.lastName) {
+      return `${review.firstName} ${review.lastName}`;
+    } else if (review.userName) {
+      return review.userName;
+    } else if (review.user && review.user.name) {
+      return review.user.name;
+    } else {
+      return 'Utilisateur';
+    }
+  };
+
   const renderReviewItem = ({ item }) => (
     <Animatable.View 
       animation="fadeIn" 
@@ -271,12 +291,12 @@ const ReviewManagementScreen = ({ navigation }) => {
         <View style={styles.userInfo}>
           <User size={18} color={COLORS.primary} />
           <Text style={styles.userName}>
-            {item.userName || item.user?.name || 'Utilisateur'}
+            {formatUserName(item)}
           </Text>
         </View>
         <View style={styles.dateContainer}>
           <Calendar size={14} color={COLORS.gray} />
-          <Text style={styles.dateText}>{formatDate(item.date || item.createdAt)}</Text>
+          <Text style={styles.dateText}>{formatDate(item.createdAt || item.date)}</Text>
         </View>
       </View>
       
@@ -332,7 +352,7 @@ const ReviewManagementScreen = ({ navigation }) => {
 
   // Calculer les statistiques
   const averageRating = reviews.length > 0 
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+    ? (reviews.reduce((sum, review) => sum + parseFloat(review.rating), 0) / reviews.length).toFixed(1)
     : '0.0';
   const repliedCount = reviews.filter(r => r.replied).length;
 
