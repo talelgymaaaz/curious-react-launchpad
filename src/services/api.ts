@@ -1,4 +1,3 @@
-
 /**
  * api.ts
  * 
@@ -64,6 +63,7 @@ export interface Property {
   owner_id?: string;
   created_at?: string;
   updated_at?: string;
+  description?: string; // Add description property as optional
   // Office property amenities
   wifi?: boolean;
   parking?: boolean;

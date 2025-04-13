@@ -1,4 +1,3 @@
-
 /**
  * PropertyDetails.tsx
  * 
@@ -7,7 +6,7 @@
  * relatives à un espace de travail spécifique.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -62,44 +61,52 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
+
+  // Use useCallback to memoize the fetchProperty function
+  const fetchProperty = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      console.log("Fetching property with ID:", id);
+      const propertyData = await propertyApi.getPropertyById(id);
+      console.log("Fetched property:", propertyData);
+      setProperty(propertyData);
+    } catch (error) {
+      console.error('Error fetching property details:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de récupérer les détails de la propriété",
+        variant: "destructive",
+      });
+      // Redirect back to properties list on error
+      navigate('/properties');
+    } finally {
+      // Use a small timeout to prevent layout shift
+      setTimeout(() => {
+        setLoading(false);
+      }, 300);
+    }
+  }, [id, toast, navigate]);
 
   useEffect(() => {
-    const fetchProperty = async () => {
-      if (!id) return;
-      
-      try {
-        setLoading(true);
-        console.log("Fetching property with ID:", id);
-        const propertyData = await propertyApi.getPropertyById(id);
-        console.log("Fetched property:", propertyData);
-        setProperty(propertyData);
-      } catch (error) {
-        console.error('Error fetching property details:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de récupérer les détails de la propriété",
-          variant: "destructive",
-        });
-        // Redirect back to properties list on error
-        navigate('/properties');
-      } finally {
-        // Use a small timeout to prevent layout shift
-        setTimeout(() => {
-          setLoading(false);
-        }, 300);
-      }
-    };
+    // Only fetch data on first render or when id changes
+    if (isFirstRender && id) {
+      fetchProperty();
+      setIsFirstRender(false);
+    }
+  }, [id, fetchProperty, isFirstRender]);
 
-    // Pre-load image to prevent flickering
-    if (id && !loading && property?.image_url) {
+  // Pre-load image in a separate effect to prevent multiple fetch triggers
+  useEffect(() => {
+    if (id && property?.image_url) {
       const img = new Image();
       img.src = property.image_url;
       img.onload = () => setImageLoaded(true);
       img.onerror = () => setImgError(true);
     }
-
-    fetchProperty();
-  }, [id, toast, navigate]);
+  }, [id, property]);
 
   const handleDelete = async () => {
     if (!id || !property || !canDelete('properties')) return;

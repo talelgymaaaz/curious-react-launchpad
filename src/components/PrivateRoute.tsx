@@ -58,6 +58,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   const hasPermission = hasAccess(location.pathname);
   console.log("User has access to", location.pathname, ":", hasPermission);
   
+  // Allow access to property detail pages regardless of permission
   if (!hasPermission && !location.pathname.startsWith('/properties/')) {
     // Redirect to properties instead of dashboard if they don't have access
     // But allow accessing property detail pages
