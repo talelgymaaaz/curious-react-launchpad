@@ -1,3 +1,4 @@
+
 /**
  * PropertyDetails.tsx
  * 
@@ -31,7 +32,9 @@ import {
   Share2,
   Download,
   BookmarkPlus,
-  Phone
+  Phone,
+  Edit,
+  Save
 } from 'lucide-react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -47,21 +50,39 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { propertyApi, Property } from '@/services/api';
+import { propertyApi, Property, PropertyUpdate } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const PropertyDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { canDelete } = useAuth();
+  const { canDelete, user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [isFirstRender, setIsFirstRender] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<PropertyUpdate>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Use useCallback to memoize the fetchProperty function
   const fetchProperty = useCallback(async () => {
@@ -73,6 +94,23 @@ const PropertyDetails = () => {
       const propertyData = await propertyApi.getPropertyById(id);
       console.log("Fetched property:", propertyData);
       setProperty(propertyData);
+      setFormData({
+        title: propertyData.title,
+        address: propertyData.address,
+        price: propertyData.price,
+        description: propertyData.description || '',
+        type: propertyData.type,
+        status: propertyData.status,
+        wifi: propertyData.wifi,
+        parking: propertyData.parking,
+        coffee: propertyData.coffee,
+        reception: propertyData.reception,
+        secured: propertyData.secured,
+        accessible: propertyData.accessible,
+        printers: propertyData.printers,
+        kitchen: propertyData.kitchen,
+        flexible_hours: propertyData.flexible_hours,
+      });
     } catch (error) {
       console.error('Error fetching property details:', error);
       toast({
@@ -128,6 +166,62 @@ const PropertyDetails = () => {
     }
   };
 
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'number' ? Number(value) : value
+    });
+  };
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData({
+      ...formData,
+      [name]: checked
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      const updatedProperty = await propertyApi.updateProperty(id, formData, imageFile || undefined);
+      
+      // Update the local property state with the new data
+      setProperty(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          ...formData,
+          image_url: updatedProperty.image_url || prev.image_url
+        } as Property;
+      });
+      
+      setIsEditing(false);
+      toast({
+        title: "Succès",
+        description: "Propriété mise à jour avec succès",
+      });
+    } catch (error) {
+      console.error('Error updating property:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la propriété",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const statusColors = {
     available: { bg: 'bg-green-100', text: 'text-green-700', label: 'Disponible' },
     booked: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Réservé' },
@@ -176,6 +270,229 @@ const PropertyDetails = () => {
 
   const statusStyle = statusColors[property.status as keyof typeof statusColors] || statusColors.available;
   const isOfficeProperty = property.property_type === 'office';
+  const canEdit = user?.role === 'admin' || user?.role === 'owner';
+
+  if (isEditing) {
+    return (
+      <Layout>
+        <div className="space-y-8 animate-fade-in">
+          <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 bg-background p-4 rounded-lg shadow-sm border border-border/20">
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" size="icon" className="shrink-0" onClick={() => setIsEditing(false)}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Modifier la propriété</h1>
+                <p className="text-sm text-muted-foreground mt-1">Modifiez les détails de cette propriété</p>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleFormSubmit} className="space-y-8">
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations de base</CardTitle>
+                <CardDescription>Modifiez les informations principales de la propriété</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Titre</Label>
+                    <Input 
+                      id="title" 
+                      name="title" 
+                      value={formData.title || ''} 
+                      onChange={handleFormChange} 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Adresse</Label>
+                    <Input 
+                      id="address" 
+                      name="address" 
+                      value={formData.address || ''} 
+                      onChange={handleFormChange} 
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Prix (€/jour)</Label>
+                    <Input 
+                      id="price" 
+                      name="price" 
+                      type="number" 
+                      value={formData.price || ''} 
+                      onChange={handleFormChange} 
+                      required 
+                      min="0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Input 
+                      id="type" 
+                      name="type" 
+                      value={formData.type || ''} 
+                      onChange={handleFormChange} 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Statut</Label>
+                    <select 
+                      id="status" 
+                      name="status" 
+                      value={formData.status || 'available'} 
+                      onChange={handleFormChange}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="available">Disponible</option>
+                      <option value="booked">Réservé</option>
+                      <option value="maintenance">Maintenance</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea 
+                    id="description" 
+                    name="description" 
+                    value={formData.description || ''} 
+                    onChange={handleFormChange} 
+                    rows={4}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="image">Image (optionnel)</Label>
+                  <Input 
+                    id="image" 
+                    name="image" 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileChange} 
+                  />
+                  {property.image_url && !imageFile && (
+                    <div className="mt-2">
+                      <p className="text-sm text-muted-foreground mb-2">Image actuelle:</p>
+                      <img 
+                        src={property.image_url} 
+                        alt={property.title} 
+                        className="h-32 object-cover rounded-md" 
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Amenities (for office properties) */}
+            {isOfficeProperty && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Équipements</CardTitle>
+                  <CardDescription>Sélectionnez les équipements disponibles</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="wifi" 
+                        checked={!!formData.wifi} 
+                        onCheckedChange={(checked) => handleCheckboxChange('wifi', !!checked)} 
+                      />
+                      <Label htmlFor="wifi" className="cursor-pointer">WiFi</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="parking" 
+                        checked={!!formData.parking} 
+                        onCheckedChange={(checked) => handleCheckboxChange('parking', !!checked)} 
+                      />
+                      <Label htmlFor="parking" className="cursor-pointer">Parking</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="coffee" 
+                        checked={!!formData.coffee} 
+                        onCheckedChange={(checked) => handleCheckboxChange('coffee', !!checked)} 
+                      />
+                      <Label htmlFor="coffee" className="cursor-pointer">Machine à café</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="kitchen" 
+                        checked={!!formData.kitchen} 
+                        onCheckedChange={(checked) => handleCheckboxChange('kitchen', !!checked)} 
+                      />
+                      <Label htmlFor="kitchen" className="cursor-pointer">Cuisine</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="printers" 
+                        checked={!!formData.printers} 
+                        onCheckedChange={(checked) => handleCheckboxChange('printers', !!checked)} 
+                      />
+                      <Label htmlFor="printers" className="cursor-pointer">Imprimantes</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="secured" 
+                        checked={!!formData.secured} 
+                        onCheckedChange={(checked) => handleCheckboxChange('secured', !!checked)} 
+                      />
+                      <Label htmlFor="secured" className="cursor-pointer">Sécurisé</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="reception" 
+                        checked={!!formData.reception} 
+                        onCheckedChange={(checked) => handleCheckboxChange('reception', !!checked)} 
+                      />
+                      <Label htmlFor="reception" className="cursor-pointer">Réception</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="accessible" 
+                        checked={!!formData.accessible} 
+                        onCheckedChange={(checked) => handleCheckboxChange('accessible', !!checked)} 
+                      />
+                      <Label htmlFor="accessible" className="cursor-pointer">Accessible PMR</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="flexible_hours" 
+                        checked={!!formData.flexible_hours} 
+                        onCheckedChange={(checked) => handleCheckboxChange('flexible_hours', !!checked)} 
+                      />
+                      <Label htmlFor="flexible_hours" className="cursor-pointer">Accès 24h/24 et 7j/7</Label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-4">
+              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" className="flex gap-2 items-center">
+                <Save className="h-4 w-4" />
+                Enregistrer les modifications
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -198,10 +515,33 @@ const PropertyDetails = () => {
             <Badge className={cn("px-3 py-1.5 rounded-md font-medium", statusStyle.bg, statusStyle.text)}>
               {statusStyle.label}
             </Badge>
-            {canDelete('properties') && (
-              <Button variant="destructive" size="sm" className="h-9" onClick={handleDelete}>
-                Supprimer
+            {canEdit && (
+              <Button variant="outline" size="sm" className="h-9" onClick={() => setIsEditing(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Modifier
               </Button>
+            )}
+            {canDelete('properties') && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" className="h-9">
+                    Supprimer
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer cette propriété?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irréversible. Cela supprimera définitivement cette propriété
+                      et toutes les données associées.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
