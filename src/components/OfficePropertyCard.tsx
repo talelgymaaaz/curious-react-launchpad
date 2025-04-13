@@ -119,12 +119,15 @@ export const OfficePropertyCard: React.FC<OfficePropertyCardProps> = ({
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Si le clic n'est pas sur un bouton, déclencher le callback onClick
     if (!(e.target as HTMLElement).closest('button')) {
-      e.preventDefault();
+      // Empêcher la navigation par défaut
+      e.stopPropagation();
       console.log("Card clicked for property:", property.id);
+      
       if (onClick) {
         onClick();
       } else {
         // Naviguer vers la page de détails de la propriété
+        console.log("Navigating to:", `/properties/${property.id}`);
         navigate(`/properties/${property.id}`);
       }
     }

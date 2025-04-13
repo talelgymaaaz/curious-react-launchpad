@@ -24,6 +24,8 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   const location = useLocation();
   const { isAuthenticated, hasAccess } = useAuth();
   
+  console.log("PrivateRoute - path:", location.pathname, "isAuthenticated:", isAuthenticated);
+  
   // Show loading indicator while checking authentication status
   if (localStorage.getItem('isAuthenticated') === 'true' && localStorage.getItem('userData') && !isAuthenticated) {
     return (
@@ -40,8 +42,12 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   }
   
   // Check if user has access to this route
-  if (!hasAccess(location.pathname)) {
+  const hasPermission = hasAccess(location.pathname);
+  console.log("User has access to", location.pathname, ":", hasPermission);
+  
+  if (!hasPermission && !location.pathname.startsWith('/properties/')) {
     // Redirect to properties instead of dashboard if they don't have access
+    // But allow accessing property detail pages
     return <Navigate to="/properties" replace />;
   }
   
