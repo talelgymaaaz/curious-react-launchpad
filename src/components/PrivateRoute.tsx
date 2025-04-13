@@ -11,7 +11,7 @@
  * - Affiche un indicateur de chargement pendant la vérification
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -23,15 +23,28 @@ type PrivateRouteProps = {
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   const location = useLocation();
   const { isAuthenticated, hasAccess } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   
   console.log("PrivateRoute - path:", location.pathname, "isAuthenticated:", isAuthenticated);
   
+  // Set a timeout to prevent flashing loading state for fast auth checks
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
   // Show loading indicator while checking authentication status
-  if (localStorage.getItem('isAuthenticated') === 'true' && localStorage.getItem('userData') && !isAuthenticated) {
+  if ((localStorage.getItem('isAuthenticated') === 'true' && localStorage.getItem('userData') && !isAuthenticated) || 
+      (isLoading && localStorage.getItem('isAuthenticated') === 'true')) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">Chargement...</span>
+      <div className="h-screen w-screen flex items-center justify-center bg-background transition-opacity">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <span className="ml-2 text-lg mt-4 font-medium text-primary">Chargement...</span>
+        </div>
       </div>
     );
   }
