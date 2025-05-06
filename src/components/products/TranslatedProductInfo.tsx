@@ -41,20 +41,22 @@ const TranslatedProductInfo = ({
     isPaquetDe3,
     specialKey: isPlateauDeDattes ? 'product_names.dates_platter' : isPaquetDe3 ? 'product_names.three_dates_package' : null,
     specialKeyExists: isPlateauDeDattes ? i18n.exists('product_names.dates_platter') : isPaquetDe3 ? i18n.exists('product_names.three_dates_package') : false,
-    specialKeyTranslation: isPlateauDeDattes ? t('product_names.dates_platter') : isPaquetDe3 ? t('product_names.three_dates_package') : null
+    specialKeyTranslation: isPlateauDeDattes ? t('product_names.dates_platter') : isPaquetDe3 ? t('product_names.three_dates_package') : null,
+    descriptionKeyExists: isPlateauDeDattes ? i18n.exists('product_descriptions.dates_platter') : isPaquetDe3 ? i18n.exists('product_descriptions.three_dates_package') : i18n.exists(descriptionKey || '')
   });
 
   // Get the translated text with proper checking and fallbacks
   let translatedTitle = fallback;
   let translatedDescription = '';
   
-  // Special case handling - this is rewritten to be more direct and clear
+  // Special case handling for Plateau de Dattes
   if (isPlateauDeDattes) {
     // Always use the direct translation key for Plateau de Dattes
     translatedTitle = t('product_names.dates_platter');
     translatedDescription = t('product_descriptions.dates_platter');
     console.log(`Special case handling: Plateau de Dattes detected - Using direct translation: ${translatedTitle}`);
   } 
+  // Special case handling for Paquet de 3
   else if (isPaquetDe3) {
     // Always use the direct translation key for Paquet de 3
     translatedTitle = t('product_names.three_dates_package');
