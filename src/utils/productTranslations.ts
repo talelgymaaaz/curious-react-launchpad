@@ -101,6 +101,8 @@ export const getProductTranslationPath = (title: string): { key: string, fallbac
   } else if (title === 'Sirop de Dattes 340ml') {
     // Make sure this exact title is processed correctly
     adjustedTitle = 'Sirop de Dattes 340ml';
+  } else if (title === 'Paquet de 3 dattes' || title.toLowerCase().includes('paquet de 3')) {
+    adjustedTitle = 'Paquet de 3 dattes';
   }
   
   // Get the translation key for this adjusted title
