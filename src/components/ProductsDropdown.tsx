@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -65,37 +64,23 @@ const MENU_ITEMS: MenuItem[] = [
     }
   },
   {
-    label: "Sirop de Dattes",
-    translationKey: "navbar.date_syrup",
+    label: "Dérivés de Dattes",
+    translationKey: "navbar.date_derivatives",
     directLink: {
       href: "products",
-      category: "sirop-dattes",
-      productId: "13"  // Correct productId for Sirop de Dattes
-    }
-  },
-  {
-    label: "Sucre de Dattes",
-    translationKey: "navbar.date_sugar",
-    directLink: {
-      href: "products",
-      category: "sucre-dattes",
-      productId: "12"  // Correct productId for Sucre de Dattes
-    }
-  },
-  {
-    label: "Café de Dattes",
-    translationKey: "navbar.date_coffee",
-    directLink: {
-      href: "products",
-      category: "cafe-dattes",
-      productId: "11"  // Correct productId for Café de Dattes
-    }
+      category: "cafe-dattes,sucre-dattes,sirop-dattes"
+    },
+    items: [
+      { label: "Café de Dattes", href: "products", category: "cafe-dattes", productId: "11", translationKey: "navbar.date_coffee" },
+      { label: "Sucre de Dattes", href: "products", category: "sucre-dattes", productId: "12", translationKey: "navbar.date_sugar" },
+      { label: "Sirop de Dattes", href: "products", category: "sirop-dattes", productId: "13", translationKey: "navbar.date_syrup" }
+    ]
   },
   {
     label: "Produits Techniques",
     translationKey: "navbar.technical_products",
     directLink: {
-      href: "products",
+      href: "technical-products",
       category: "technical-products"
     },
     b2bOnly: true // Set this item to be B2B only

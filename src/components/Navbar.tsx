@@ -31,7 +31,6 @@ interface SubMenuItem {
   subcategory?: string;
   translationKey: string;
   productId?: string;
-  productId?: string;
 }
 
 const MENU_ITEMS: MenuItem[] = [
@@ -68,35 +67,21 @@ const MENU_ITEMS: MenuItem[] = [
     directLink: {
       href: "products",
       category: "dattes-farcies",
-      productId: "13"  // Correct productId for Sirop de Dattes
+      productId: "13"
     }
   },
   {
-    label: "Sirop de Dattes",
-    translationKey: "navbar.date_syrup",
+    label: "Dérivés de Dattes",
+    translationKey: "navbar.date_derivatives",
     directLink: {
       href: "products",
-      category: "sirop-dattes",
-      productId: "13"  // Correct productId for Sirop de Dattes
-    }
-  },
-  {
-    label: "Sucre de Dattes",
-    translationKey: "navbar.date_sugar",
-    directLink: {
-      href: "products",
-      category: "sucre-dattes",
-      productId: "12"  // Correct productId for Sucre de Dattes
-    }
-  },
-  {
-    label: "Café de Dattes",
-    translationKey: "navbar.date_coffee",
-    directLink: {
-      href: "products",
-      category: "cafe-dattes",
-      productId: "11"  // Correct productId for Café de Dattes
-    }
+      category: "cafe-dattes,sucre-dattes,sirop-dattes"
+    },
+    items: [
+      { label: "Café de Dattes", href: "products", category: "cafe-dattes", productId: "11", translationKey: "navbar.date_coffee" },
+      { label: "Sucre de Dattes", href: "products", category: "sucre-dattes", productId: "12", translationKey: "navbar.date_sugar" },
+      { label: "Sirop de Dattes", href: "products", category: "sirop-dattes", productId: "13", translationKey: "navbar.date_syrup" }
+    ]
   }
 ];
 
