@@ -47,21 +47,25 @@ const TranslatedProductInfo = ({
 
   // Get the translated text with proper checking and fallbacks
   let translatedTitle = fallback;
-  let translatedDescription = '';
+  let translatedDescription = product.description || ''; // Default to original description
   
   // Special case handling for Plateau de Dattes
   if (isPlateauDeDattes) {
     // Always use the direct translation key for Plateau de Dattes
     translatedTitle = t('product_names.dates_platter');
-    translatedDescription = t('product_descriptions.dates_platter');
-    console.log(`Special case handling: Plateau de Dattes detected - Using direct translation: ${translatedTitle}`);
+    if (i18n.exists('product_descriptions.dates_platter')) {
+      translatedDescription = t('product_descriptions.dates_platter');
+      console.log(`Special case handling: Plateau de Dattes description - Using direct translation`);
+    }
   } 
   // Special case handling for Paquet de 3
   else if (isPaquetDe3) {
     // Always use the direct translation key for Paquet de 3
     translatedTitle = t('product_names.three_dates_package');
-    translatedDescription = t('product_descriptions.three_dates_package'); 
-    console.log(`Special case handling: Paquet de 3 detected - Using direct translation: ${translatedTitle}`);
+    if (i18n.exists('product_descriptions.three_dates_package')) {
+      translatedDescription = t('product_descriptions.three_dates_package'); 
+      console.log(`Special case handling: Paquet de 3 description - Using direct translation`);
+    }
   }
   // Regular case handling
   else if (key && i18n.exists(key)) {
@@ -70,7 +74,7 @@ const TranslatedProductInfo = ({
     
     if (descriptionKey && i18n.exists(descriptionKey)) {
       translatedDescription = t(descriptionKey);
-      console.log(`Regular description found for key ${descriptionKey}`);
+      console.log(`Regular description found for key ${descriptionKey}: ${translatedDescription.substring(0, 30)}...`);
     }
   } 
   else {

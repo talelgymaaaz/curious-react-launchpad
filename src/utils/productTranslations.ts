@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for product title translations
  */
@@ -36,7 +37,7 @@ export const getProductTranslationKey = (title: string): string => {
     'Barquette Dattes Dénoyautées 500g': 'pitted_dates_tray_500g',
     'Barquette Dattes Dénoyautées 200g': 'pitted_dates_tray_200g',
     'Figues Zidi 200g': 'dried_figs_200g',
-    'Paquet de 3 Dattes' : 'dried_figs_200g',
+    'Paquet de 3 Dattes' : 'three_dates_package',
   };
 
   // First try exact match
