@@ -11,9 +11,10 @@ interface MobileSidebarProps {
   onClose: () => void;
   onStoreFinderOpen?: () => void;
   onBookingOpen?: () => void;
+  onWishlistOpen?: () => void;
 }
 
-const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen }: MobileSidebarProps) => {
+const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWishlistOpen }: MobileSidebarProps) => {
   const { t } = useTranslation();
 
   const navItems = [
@@ -30,7 +31,11 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen }: Mo
     { 
       icon: Heart, 
       label: t('common.wishlist'),
-      description: 'Vos articles favoris'
+      description: 'Vos articles favoris',
+      onClick: () => {
+        onClose();
+        onWishlistOpen?.();
+      }
     },
     { 
       icon: MapPin, 
@@ -39,15 +44,6 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen }: Mo
       onClick: () => {
         onClose();
         onBookingOpen?.();
-      }
-    },
-    { 
-      icon: MapPin, 
-      label: t('header.findStore'),
-      description: 'Trouvez nos boutiques',
-      onClick: () => {
-        onClose();
-        onStoreFinderOpen?.();
       }
     },
   ];
@@ -140,7 +136,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen }: Mo
               ))}
             </div>
 
-            <Separator className="my-4 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <Separator className="my-3 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             {/* Social Media Section */}
             <div className="space-y-0.5">
