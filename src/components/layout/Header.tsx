@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, ShoppingBag, MapPin, Menu, Heart } from 'lucide-react';
+import { Search, ShoppingBag, MapPin, Menu, Heart, Instagram, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LanguageSelector from './LanguageSelector';
 import SearchModal from '../modals/SearchModal';
@@ -57,21 +56,52 @@ const Header = ({ onMenuClick }: HeaderProps) => {
     }`}>
       {/* Top utility bar - always visible */}
       <div className="hidden md:block border-b border-gray-100 py-2 px-6">
-        <div className="flex justify-end items-center text-sm space-x-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={`transition-colors ${
-              isScrolled 
-                ? 'text-gray-600 hover:text-gray-900' 
-                : 'text-white/90 hover:text-white'
-            }`}
-            onClick={handleStoreFinderOpen}
-          >
-            <MapPin className="w-4 h-4 mr-1" />
-            {t('header.findStore')}
-          </Button>
-          <LanguageSelector variant={isScrolled ? 'default' : 'white'} />
+        <div className="flex justify-between items-center text-sm">
+          {/* Social Media Links - Left side */}
+          <div className="flex items-center space-x-3">
+            <a
+              href="https://www.instagram.com/luccibyey/?hl=en"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`transition-colors hover:scale-110 transform ${
+                isScrolled 
+                  ? 'text-gray-600 hover:text-gray-900' 
+                  : 'text-white/90 hover:text-white'
+              }`}
+            >
+              <Instagram className="w-4 h-4" />
+            </a>
+            <a
+              href="https://www.facebook.com/luccibyey.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`transition-colors hover:scale-110 transform ${
+                isScrolled 
+                  ? 'text-gray-600 hover:text-gray-900' 
+                  : 'text-white/90 hover:text-white'
+              }`}
+            >
+              <Facebook className="w-4 h-4" />
+            </a>
+          </div>
+
+          {/* Store Finder and Language - Right side */}
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`transition-colors ${
+                isScrolled 
+                  ? 'text-gray-600 hover:text-gray-900' 
+                  : 'text-white/90 hover:text-white'
+              }`}
+              onClick={handleStoreFinderOpen}
+            >
+              <MapPin className="w-4 h-4 mr-1" />
+              {t('header.findStore')}
+            </Button>
+            <LanguageSelector variant={isScrolled ? 'default' : 'white'} />
+          </div>
         </div>
       </div>
 
@@ -160,33 +190,33 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             </Button>
           </div>
         </div>
-
-        {/* Mobile Search Dropdown */}
-        {isSearchOpen && (
-          <div className="md:hidden mt-4 pt-4 border-t border-gray-100 animate-fade-in">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Rechercher parmi nos collections premium"
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent ${
-                  isScrolled 
-                    ? 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500' 
-                    : 'border-white/30 bg-white/10 text-white placeholder-white/70 backdrop-blur-sm'
-                }`}
-                autoFocus
-              />
-            </div>
-            <div className="mt-3 text-center">
-              <p className={`text-xs ${
-                isScrolled ? 'text-gray-500' : 'text-white/70'
-              }`}>
-                Recherchez parmi nos collections premium
-              </p>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Mobile Search Dropdown */}
+      {isSearchOpen && (
+        <div className="md:hidden mt-4 pt-4 border-t border-gray-100 animate-fade-in">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Rechercher parmi nos collections premium"
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent ${
+                isScrolled 
+                  ? 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500' 
+                  : 'border-white/30 bg-white/10 text-white placeholder-white/70 backdrop-blur-sm'
+              }`}
+              autoFocus
+            />
+          </div>
+          <div className="mt-3 text-center">
+            <p className={`text-xs ${
+              isScrolled ? 'text-gray-500' : 'text-white/70'
+            }`}>
+              Recherchez parmi nos collections premium
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Desktop Search Modal */}
       <SearchModal isOpen={isSearchOpen && window.innerWidth >= 768} onClose={() => setIsSearchOpen(false)} />
