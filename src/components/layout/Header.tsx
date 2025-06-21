@@ -55,21 +55,23 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         ? 'top-0 bg-white border-b border-gray-100 shadow-sm' 
         : 'top-[42px] bg-transparent'
     }`}>
-      {/* Top utility bar - only visible when scrolled */}
-      <div className={`hidden md:block border-b border-gray-100 py-2 px-6 transition-all duration-300 ${
-        isScrolled ? 'opacity-100' : 'opacity-0 h-0 py-0 overflow-hidden'
-      }`}>
+      {/* Top utility bar - always visible */}
+      <div className="hidden md:block border-b border-gray-100 py-2 px-6">
         <div className="flex justify-end items-center text-sm space-x-4">
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-gray-600 hover:text-gray-900"
+            className={`transition-colors ${
+              isScrolled 
+                ? 'text-gray-600 hover:text-gray-900' 
+                : 'text-white/90 hover:text-white'
+            }`}
             onClick={handleStoreFinderOpen}
           >
             <MapPin className="w-4 h-4 mr-1" />
             {t('header.findStore')}
           </Button>
-          <LanguageSelector />
+          <LanguageSelector variant={isScrolled ? 'default' : 'white'} />
         </div>
       </div>
 
