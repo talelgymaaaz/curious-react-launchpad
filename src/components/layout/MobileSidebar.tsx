@@ -45,7 +45,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
       description: 'Envoyez-nous un message',
       onClick: () => {
         onClose();
-        onContactOpen?.();
+        window.location.href = '/contact';
       }
     },
   ];
