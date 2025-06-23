@@ -31,15 +31,6 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
       }
     },
     { 
-      icon: MessageCircle, 
-      label: 'Contacter nous',
-      description: 'Envoyez-nous un message',
-      onClick: () => {
-        onClose();
-        onContactOpen?.();
-      }
-    },
-    { 
       icon: MapPin, 
       label: 'Rdv sur mesure',
       description: 'Réservez votre mesure privée',
@@ -151,7 +142,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
             <Separator className="my-4 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             {/* Services Section */}
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-2">
                 Services
               </h3>
@@ -159,10 +150,10 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
                 <a
                   key={index}
                   href="#"
-                  className="group flex items-center p-1.5 text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-500/20 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-400/20"
+                  className="group flex items-center p-2 text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-500/20 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-400/20"
                   onClick={item.onClick || handleMainClose}
                 >
-                  <div className="flex items-center justify-center w-6 h-6 bg-white/10 group-hover:bg-blue-500/20 rounded-lg mr-2 transition-colors duration-200">
+                  <div className="flex items-center justify-center w-6 h-6 bg-white/10 group-hover:bg-blue-500/20 rounded-lg mr-3 transition-colors duration-200">
                     <item.icon className="w-3 h-3 text-white/80 group-hover:text-blue-200 transition-colors duration-200" />
                   </div>
                   <div className="flex-1">
@@ -180,7 +171,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
             <Separator className="my-3 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             {/* Social Media Section */}
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-2">
                 Suivez-nous
               </h3>
@@ -259,7 +250,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
+              <SheetTitle className="text-white text-lg font-semibold">{title}</SheetTitle>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -272,22 +263,24 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
           </SheetHeader>
           
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-2">
+          <div className="flex-1 overflow-y-auto p-3">
+            <div className="space-y-1">
               {items.map((item, index) => {
                 const isTitle = item.key.endsWith('-title');
                 return (
                   <div key={index}>
                     {isTitle ? (
-                      <h4 className="text-lg font-semibold text-blue-200 mb-3 mt-6 first:mt-0 px-2">
-                        {item.value}
-                      </h4>
+                      <div className="mb-2 mt-4 first:mt-2">
+                        <h4 className="text-base font-semibold text-blue-200 px-3 py-2 border-l-3 border-blue-400 bg-blue-900/20 rounded-r-md">
+                          {item.value}
+                        </h4>
+                      </div>
                     ) : (
                       <button
                         onClick={handleItemClick}
-                        className="w-full text-left p-4 text-white/90 hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-500/20 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-400/20"
+                        className="w-full text-left px-4 py-2.5 text-white/90 hover:bg-gradient-to-r hover:from-blue-600/30 hover:to-blue-500/30 rounded-md transition-all duration-200 border border-transparent hover:border-blue-400/20 ml-2"
                       >
-                        <span className="text-base font-medium">{item.value}</span>
+                        <span className="text-sm font-medium">{item.value}</span>
                       </button>
                     )}
                   </div>
