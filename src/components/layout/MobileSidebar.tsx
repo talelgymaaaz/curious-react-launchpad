@@ -39,15 +39,6 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
         onBookingOpen?.();
       }
     },
-    { 
-      icon: MessageCircle, 
-      label: 'Nous Contacter',
-      description: 'Envoyez-nous un message',
-      onClick: () => {
-        onClose();
-        window.location.href = '/contact';
-      }
-    },
   ];
 
   const socialMediaItems = [
