@@ -74,7 +74,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
 
   const renderMainSidebar = () => (
     <Sheet open={isOpen && !activeSubMenu} onOpenChange={handleMainClose}>
-      <SheetContent side="left" className="w-80 p-0 bg-black/80 backdrop-blur-xl border-r border-gray-700 [&>button]:hidden h-full flex flex-col">
+      <SheetContent side="left" className="w-80 p-0 bg-black/60 backdrop-blur-xl border-r border-gray-700 [&>button]:hidden h-full flex flex-col">
         {/* Header */}
         <SheetHeader className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-4 shadow-lg flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -100,7 +100,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-4">
             {/* Main Navigation */}
-            <div className="space-y-0.5 mb-6">
+            <div className="space-y-0 mb-6">
               <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3 px-2">
                 Collections
               </h3>
@@ -139,10 +139,10 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
               </button>
             </div>
 
-            <Separator className="my-4 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <Separator className="my-3 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             {/* Services Section */}
-            <div className="space-y-1">
+            <div className="space-y-0">
               <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-2">
                 Services
               </h3>
@@ -171,7 +171,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
             <Separator className="my-3 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             {/* Social Media Section */}
-            <div className="space-y-1">
+            <div className="space-y-0">
               <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-2">
                 Suivez-nous
               </h3>
@@ -238,7 +238,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
 
     return (
       <Sheet open={!!activeSubMenu} onOpenChange={(open) => !open && handleSubMenuClose()}>
-        <SheetContent side="left" className="w-80 p-0 bg-black/95 backdrop-blur-xl border-r border-gray-700 [&>button]:hidden h-full flex flex-col">
+        <SheetContent side="left" className="w-80 p-0 bg-black/70 backdrop-blur-xl border-r border-gray-700 [&>button]:hidden h-full flex flex-col">
           {/* Header */}
           <SheetHeader className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-4 shadow-lg flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -264,13 +264,13 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
           
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-3">
-            <div className="space-y-1">
+            <div className="space-y-0">
               {items.map((item, index) => {
                 const isTitle = item.key.endsWith('-title');
                 return (
                   <div key={index}>
                     {isTitle ? (
-                      <div className="mb-2 mt-4 first:mt-2">
+                      <div className="mb-1 mt-3 first:mt-1">
                         <h4 className="text-base font-semibold text-blue-200 px-3 py-2 border-l-3 border-blue-400 bg-blue-900/20 rounded-r-md">
                           {item.value}
                         </h4>
@@ -278,7 +278,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
                     ) : (
                       <button
                         onClick={handleItemClick}
-                        className="w-full text-left px-4 py-2.5 text-white/90 hover:bg-gradient-to-r hover:from-blue-600/30 hover:to-blue-500/30 rounded-md transition-all duration-200 border border-transparent hover:border-blue-400/20 ml-2"
+                        className="w-full text-left px-4 py-2 text-white/90 hover:bg-gradient-to-r hover:from-blue-600/30 hover:to-blue-500/30 rounded-md transition-all duration-200 border border-transparent hover:border-blue-400/20 ml-2"
                       >
                         <span className="text-sm font-medium">{item.value}</span>
                       </button>
