@@ -45,7 +45,7 @@ const FeaturedProducts = () => {
   const [likedProducts, setLikedProducts] = useState<Set<number>>(new Set());
   
   const plugin = useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: true })
+    Autoplay({ delay: 5000, stopOnInteraction: true })
   );
 
   useEffect(() => {
@@ -144,7 +144,7 @@ const FeaturedProducts = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="animate-pulse">
-                <div className="aspect-[3/4] bg-slate-200 mb-4"></div>
+                <div className="aspect-[3/3.8] bg-slate-200 mb-4"></div>
                 <div className="h-4 bg-slate-200 mb-2"></div>
                 <div className="h-4 bg-slate-200 w-2/3"></div>
               </div>
@@ -192,9 +192,9 @@ const FeaturedProducts = () => {
                   <CarouselItem key={product.id_product} className="pl-2 md:pl-4 basis-1/2 md:basis-1/4">
                     <div className="group relative">
                       <div className="relative">
-                        {/* Product Image with hover effect */}
+                        {/* Product Image with hover effect - Reduced height by 5% */}
                         <div 
-                          className="relative aspect-[3/4] overflow-hidden bg-slate-100 mb-4 md:mb-6 rounded-lg cursor-pointer"
+                          className="relative aspect-[3/3.8] overflow-hidden bg-slate-100 mb-4 md:mb-6 rounded-lg cursor-pointer"
                           onClick={() => handleProductClick(product.id_product)}
                         >
                           {/* Primary Image */}
@@ -316,9 +316,9 @@ const FeaturedProducts = () => {
               })}
             </CarouselContent>
             
-            {/* Navigation Arrows */}
-            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 border border-gray-300 bg-white/80 hover:bg-white" />
-            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 border border-gray-300 bg-white/80 hover:bg-white" />
+            {/* Navigation Arrows - Bigger size */}
+            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 border border-gray-300 bg-white/80 hover:bg-white" />
+            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 border border-gray-300 bg-white/80 hover:bg-white" />
           </Carousel>
         </div>
 
