@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -43,19 +42,19 @@ const FeaturedProducts = () => {
   const [likedProducts, setLikedProducts] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    fetchFeaturedProducts();
+    fetchExclusiveCollection();
   }, []);
 
-  const fetchFeaturedProducts = async () => {
+  const fetchExclusiveCollection = async () => {
     try {
-      const response = await fetch('https://draminesaid.com/lucci/api/get_featured_products.php');
+      const response = await fetch('https://draminesaid.com/lucci/api/get_exclusive_collection.php');
       const result = await response.json();
       
       if (result.success) {
-        setProducts(result.data.slice(0, 8)); // Show only 8 products
+        setProducts(result.data);
       }
     } catch (error) {
-      console.error('Error fetching featured products:', error);
+      console.error('Error fetching exclusive collection:', error);
     } finally {
       setLoading(false);
     }
