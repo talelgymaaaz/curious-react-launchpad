@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -36,12 +35,13 @@ const PaymentSuccess = () => {
     if (!orderId || !paymentRef || orderConfirmed) return;
 
     try {
-      console.log('Confirming payment for order:', orderId);
+      console.log('Confirming payment for order:', orderId, 'with payment ref:', paymentRef);
       await confirmPaymentAndUpdateOrder(orderId, paymentRef);
       setOrderConfirmed(true);
       console.log('Payment confirmed successfully');
     } catch (error) {
       console.error('Error confirming payment:', error);
+      // Don't throw error to prevent blocking the success page
     }
   };
 
@@ -98,6 +98,7 @@ const PaymentSuccess = () => {
       setPdfGenerated(true);
     } catch (error) {
       console.error('Error generating invoice PDF:', error);
+      // Don't throw error to prevent blocking the success page
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -107,16 +108,23 @@ const PaymentSuccess = () => {
     // Clear the cart after successful payment
     clearCart();
     
-    // Confirm payment if it's a card payment
+    // Confirm payment if it's a card payment (Konnect)
     if (paymentRef && orderId && paymentMethod !== 'cash_on_delivery' && paymentMethod !== 'test') {
+      console.log('Card payment detected, confirming payment...');
       confirmPayment();
+    } else if (paymentMethod === 'cash_on_delivery') {
+      console.log('Cash on delivery payment - no confirmation needed');
+      setOrderConfirmed(true);
+    } else if (paymentMethod === 'test' || testMode) {
+      console.log('Test payment - marking as confirmed');
+      setOrderConfirmed(true);
     }
     
     // Auto-generate and download PDF invoice if order ID is available
     if (orderId && !pdfGenerated) {
       generateAndDownloadInvoice();
     }
-  }, [clearCart, orderId, pdfGenerated, paymentRef, paymentMethod]);
+  }, [clearCart, orderId, pdfGenerated, paymentRef, paymentMethod, testMode]);
 
   const getPaymentMethodDisplay = () => {
     switch (paymentMethod) {

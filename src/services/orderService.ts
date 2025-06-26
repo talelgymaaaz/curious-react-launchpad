@@ -1,3 +1,4 @@
+
 export interface CustomerData {
   nom: string;
   prenom: string;
@@ -59,16 +60,20 @@ export interface OrderResponse {
 
 import { paymentConfig } from '@/config/paymentConfig';
 
+// Updated API base URL
+const API_BASE_URL = 'https://draminesaid.com/lucci/api';
+
 export const submitOrder = async (orderData: CompleteOrderRequest, language?: string): Promise<OrderResponse> => {
   try {
-    console.log('Submitting order:', orderData);
+    console.log('Submitting order to:', `${API_BASE_URL}/insert_complete_order.php`);
+    console.log('Order data:', orderData);
     
     const requestData = {
       ...orderData,
       language: language || 'fr'
     };
     
-    const response = await fetch('/api/insert_complete_order.php', {
+    const response = await fetch(`${API_BASE_URL}/insert_complete_order.php`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -123,7 +128,9 @@ export const confirmPaymentAndUpdateOrder = async (
   paymentRef: string
 ): Promise<OrderResponse> => {
   try {
-    const response = await fetch('/api/insert_complete_order.php', {
+    console.log('Confirming payment for order:', orderId, 'with payment ref:', paymentRef);
+    
+    const response = await fetch(`${API_BASE_URL}/insert_complete_order.php`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
