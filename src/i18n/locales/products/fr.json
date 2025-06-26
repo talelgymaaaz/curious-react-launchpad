@@ -1,0 +1,50 @@
+
+{
+  "categories": {
+    "surMesure": "Sur Mesure",
+    "pretAPorter": "Prêt à Porter",
+    "accessoires": "Accessoires"
+  },
+  "surMesure": {
+    "homme": {
+      "title": "Homme",
+      "blazers": "Blazers",
+      "blouson": "Blouson",
+      "manteau": "Manteau",
+      "djine": "Djine",
+      "slack": "Slack",
+      "pantalon": "Pantalon"
+    },
+    "femme": {
+      "title": "Femme",
+      "chemise": "Chemise",
+      "costume": "Costume",
+      "blazer": "Blazer"
+    }
+  },
+  "pretAPorter": {
+    "chemise": "Chemise",
+    "tshirt": "T-shirt",
+    "polo": "Polo",
+    "chaussure": "Chaussures",
+    "ceinture": "Ceinture",
+    "maroquinerie": "Maroquinerie"
+  },
+  "accessoires": {
+    "cravate": "Cravate",
+    "pochette": "Pochette",
+    "maroquinerie": "Maroquinerie",
+    "autre": "Autre"
+  },
+  "categoryDescription": "Découvrez notre collection {{category}} avec {{count}} articles disponibles.",
+  "availableSizes": "Disponible",
+  "homme-blazers": "Blazers Homme",
+  "homme-blouson": "Blouson Homme",
+  "homme-manteau": "Manteau Homme",
+  "homme-djine": "Djine Homme",
+  "homme-slack": "Slack Homme",
+  "homme-pantalon": "Pantalon Homme",
+  "femme-chemise": "Chemise Femme",
+  "femme-costume": "Costume Femme",
+  "femme-blazer": "Blazer Femme"
+}
