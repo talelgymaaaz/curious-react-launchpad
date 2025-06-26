@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Heart } from 'lucide-react';
 import { getSizeFieldsForItemGroup, SIZE_DISPLAY_NAMES } from '@/data/productCategories';
+import Autoplay from 'embla-carousel-autoplay';
 
 interface Product {
   id_product: number;
@@ -40,6 +43,10 @@ const FeaturedProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [likedProducts, setLikedProducts] = useState<Set<number>>(new Set());
+  
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
+  );
 
   useEffect(() => {
     fetchExclusiveCollection();
@@ -162,138 +169,157 @@ const FeaturedProducts = () => {
           </p>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
-          {products.map((product) => {
-            const availableSizes = getAvailableSizes(product);
-            const quantity = getProductQuantity(product);
-            const hasAvailableInfo = availableSizes.length > 0 || quantity > 0;
-            const hasSecondImage = product.img2 && product.img2.trim() !== '';
-            
-            return (
-              <div key={product.id_product} className="group relative">
-                <div className="relative">
-                  {/* Product Image with hover effect */}
-                  <div 
-                    className="relative aspect-[3/4] overflow-hidden bg-slate-100 mb-4 md:mb-6 rounded-lg cursor-pointer"
-                    onClick={() => handleProductClick(product.id_product)}
-                  >
-                    {/* Primary Image */}
-                    <img
-                      src={product.img_product || "/placeholder.svg"}
-                      alt={product.nom_product}
-                      className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                        hasSecondImage ? 'group-hover:opacity-0' : ''
-                      }`}
-                    />
-                    
-                    {/* Secondary Image - only shown when hovering and img2 exists */}
-                    {hasSecondImage && (
-                      <img
-                        src={product.img2}
-                        alt={`${product.nom_product} - Vue alternative`}
-                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
-                      />
-                    )}
-                    
-                    {/* Discount Badge - Left side */}
-                    {product.discount_product && parseFloat(product.discount_product) > 0 && (
-                      <div className="absolute top-2 md:top-4 left-2 md:left-4 z-10">
-                        <span className="bg-red-600 text-white px-2 md:px-3 py-1 text-xs font-medium tracking-widest uppercase rounded">
-                          -{parseFloat(product.discount_product)}%
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Available Sizes/Quantity - Show on Hover with 25% height at bottom */}
-                    {hasAvailableInfo && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-white/95 backdrop-blur-sm flex flex-col justify-center items-center px-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-10">
-                        {availableSizes.length > 0 ? (
-                          <>
-                            <div className="text-xs text-slate-600 mb-1 font-medium text-center">
-                              {t('products:availableSizes')}
+        {/* Products Carousel */}
+        <div className="relative mb-12">
+          <Carousel
+            plugins={[plugin.current]}
+            className="w-full"
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {products.map((product) => {
+                const availableSizes = getAvailableSizes(product);
+                const quantity = getProductQuantity(product);
+                const hasAvailableInfo = availableSizes.length > 0 || quantity > 0;
+                const hasSecondImage = product.img2 && product.img2.trim() !== '';
+                
+                return (
+                  <CarouselItem key={product.id_product} className="pl-2 md:pl-4 basis-1/2 md:basis-1/4">
+                    <div className="group relative">
+                      <div className="relative">
+                        {/* Product Image with hover effect */}
+                        <div 
+                          className="relative aspect-[3/4] overflow-hidden bg-slate-100 mb-4 md:mb-6 rounded-lg cursor-pointer"
+                          onClick={() => handleProductClick(product.id_product)}
+                        >
+                          {/* Primary Image */}
+                          <img
+                            src={product.img_product || "/placeholder.svg"}
+                            alt={product.nom_product}
+                            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                              hasSecondImage ? 'group-hover:opacity-0' : ''
+                            }`}
+                          />
+                          
+                          {/* Secondary Image - only shown when hovering and img2 exists */}
+                          {hasSecondImage && (
+                            <img
+                              src={product.img2}
+                              alt={`${product.nom_product} - Vue alternative`}
+                              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                            />
+                          )}
+                          
+                          {/* Discount Badge - Left side */}
+                          {product.discount_product && parseFloat(product.discount_product) > 0 && (
+                            <div className="absolute top-2 md:top-4 left-2 md:left-4 z-10">
+                              <span className="bg-red-600 text-white px-2 md:px-3 py-1 text-xs font-medium tracking-widest uppercase rounded">
+                                -{parseFloat(product.discount_product)}%
+                              </span>
                             </div>
-                            <div className="flex flex-wrap gap-1 justify-center">
-                              {availableSizes.map((size) => (
-                                <span 
-                                  key={size}
-                                  className="bg-slate-100 text-slate-700 px-2 py-1 text-xs rounded font-medium"
-                                >
-                                  {size}
+                          )}
+
+                          {/* Available Sizes/Quantity - Show on Hover with 25% height at bottom */}
+                          {hasAvailableInfo && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-white/95 backdrop-blur-sm flex flex-col justify-center items-center px-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-10">
+                              {availableSizes.length > 0 ? (
+                                <>
+                                  <div className="text-xs text-slate-600 mb-1 font-medium text-center">
+                                    {t('products:availableSizes')}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1 justify-center">
+                                    {availableSizes.map((size) => (
+                                      <span 
+                                        key={size}
+                                        className="bg-slate-100 text-slate-700 px-2 py-1 text-xs rounded font-medium"
+                                      >
+                                        {size}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="text-xs text-slate-600 mb-1 font-medium text-center">
+                                    {t('common:available')}
+                                  </div>
+                                  <div className="text-xs text-slate-700 font-medium text-center">
+                                    {formatQuantityText(quantity)}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Product Info */}
+                        <div className="text-left px-1 relative">
+                          {/* Category and Heart on same line */}
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="text-xs text-slate-500 tracking-widest uppercase font-medium">
+                              {product.category_product} {product.itemgroup_product && `• ${product.itemgroup_product}`}
+                            </span>
+                            
+                            {/* Heart Button - Same line as category */}
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="w-6 h-6 md:w-8 md:h-8 p-0 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLike(product.id_product);
+                              }}
+                            >
+                              <Heart 
+                                className={`w-4 h-4 md:w-5 md:h-5 transition-all duration-200 ${
+                                  likedProducts.has(product.id_product) 
+                                    ? 'text-red-500 fill-red-500' 
+                                    : 'text-slate-600 hover:text-red-500'
+                                }`} 
+                              />
+                            </Button>
+                          </div>
+                          
+                          <h3 
+                            className="font-serif font-light text-slate-900 mb-3 md:mb-4 text-base md:text-lg leading-snug cursor-pointer hover:text-slate-600 transition-colors"
+                            onClick={() => handleProductClick(product.id_product)}
+                          >
+                            {product.nom_product}
+                          </h3>
+                          
+                          <div className="flex items-center gap-2 md:gap-3">
+                            {product.discount_product && parseFloat(product.discount_product) > 0 ? (
+                              <>
+                                <span className="text-base md:text-lg font-medium text-slate-900">
+                                  {formatPrice(calculateDiscountedPrice(product.price_product, product.discount_product))}
                                 </span>
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-xs text-slate-600 mb-1 font-medium text-center">
-                              {t('common:available')}
-                            </div>
-                            <div className="text-xs text-slate-700 font-medium text-center">
-                              {formatQuantityText(quantity)}
-                            </div>
-                          </>
-                        )}
+                                <span className="text-sm text-red-500 line-through font-light">
+                                  {formatPrice(product.price_product)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-base md:text-lg font-medium text-slate-900">
+                                {formatPrice(product.price_product)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="text-left px-1 relative">
-                    {/* Category and Heart on same line */}
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-xs text-slate-500 tracking-widest uppercase font-medium">
-                        {product.category_product} {product.itemgroup_product && `• ${product.itemgroup_product}`}
-                      </span>
-                      
-                      {/* Heart Button - Same line as category */}
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="w-6 h-6 md:w-8 md:h-8 p-0 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleLike(product.id_product);
-                        }}
-                      >
-                        <Heart 
-                          className={`w-4 h-4 md:w-5 md:h-5 transition-all duration-200 ${
-                            likedProducts.has(product.id_product) 
-                              ? 'text-red-500 fill-red-500' 
-                              : 'text-slate-600 hover:text-red-500'
-                          }`} 
-                        />
-                      </Button>
                     </div>
-                    
-                    <h3 
-                      className="font-serif font-light text-slate-900 mb-3 md:mb-4 text-base md:text-lg leading-snug cursor-pointer hover:text-slate-600 transition-colors"
-                      onClick={() => handleProductClick(product.id_product)}
-                    >
-                      {product.nom_product}
-                    </h3>
-                    
-                    <div className="flex items-center gap-2 md:gap-3">
-                      {product.discount_product && parseFloat(product.discount_product) > 0 ? (
-                        <>
-                          <span className="text-base md:text-lg font-medium text-slate-900">
-                            {formatPrice(calculateDiscountedPrice(product.price_product, product.discount_product))}
-                          </span>
-                          <span className="text-sm text-red-500 line-through font-light">
-                            {formatPrice(product.price_product)}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-base md:text-lg font-medium text-slate-900">
-                          {formatPrice(product.price_product)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
+            
+            {/* Navigation Arrows */}
+            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 border border-gray-300 bg-white/80 hover:bg-white" />
+            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 border border-gray-300 bg-white/80 hover:bg-white" />
+          </Carousel>
         </div>
 
         {/* View All Button */}
