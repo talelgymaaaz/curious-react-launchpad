@@ -91,8 +91,29 @@ const ProductModalContent = ({
         newData.itemgroup_product = '';
       }
       
+      // Auto-calculate quantity when size fields change or itemgroup changes
+      if (field.includes('_size') || field === 'itemgroup_product') {
+        const calculatedQuantity = calculateTotalQuantity(newData);
+        if (shouldShowSizes(newData.itemgroup_product)) {
+          newData.qnty_product = calculatedQuantity.toString();
+        }
+      }
+      
       return newData;
     });
+  };
+
+  // Calculate total quantity from all size fields
+  const calculateTotalQuantity = (data: any) => {
+    const sizeFields = [
+      's_size', 'm_size', 'l_size', 'xl_size', 'xxl_size', '3xl_size', '4xl_size', 'xs_size',
+      '48_size', '50_size', '52_size', '54_size', '56_size', '58_size'
+    ];
+    
+    return sizeFields.reduce((total, field) => {
+      const value = parseInt(data[field]) || 0;
+      return total + value;
+    }, 0);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -181,9 +202,14 @@ const ProductModalContent = ({
     return false;
   };
 
-  const shouldShowSizes = () => {
+  const shouldShowSizes = (itemgroup?: string) => {
+    const targetItemgroup = itemgroup || formData.itemgroup_product;
     const noSizeCategories = ['cravate', 'pochette', 'maroquinerie', 'ceinture', 'autre'];
-    return !noSizeCategories.includes(formData.itemgroup_product);
+    return !noSizeCategories.includes(targetItemgroup);
+  };
+
+  const handleSizeChange = (sizeField: string, value: string) => {
+    updateFormData(sizeField, value);
   };
 
   const handleClose = () => {
@@ -195,6 +221,9 @@ const ProductModalContent = ({
     }
     resetForm();
   };
+
+  // Check if quantity should be disabled (when sizes are shown)
+  const isQuantityDisabled = shouldShowSizes();
 
   return (
     <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 bg-white border border-gray-200 overflow-hidden flex flex-col">
@@ -385,14 +414,25 @@ const ProductModalContent = ({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">Stock Total</Label>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Stock Total {isQuantityDisabled && <span className="text-xs text-blue-600">(Calculé automatiquement)</span>}
+                </Label>
                 <Input
-                  className="border-gray-300 focus:border-black focus:ring-black"
+                  className={`border-gray-300 focus:border-black focus:ring-black ${
+                    isQuantityDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
                   type="number"
                   placeholder="0"
                   value={formData.qnty_product}
-                  onChange={(e) => updateFormData('qnty_product', e.target.value)}
+                  onChange={(e) => !isQuantityDisabled && updateFormData('qnty_product', e.target.value)}
+                  disabled={isQuantityDisabled}
+                  readOnly={isQuantityDisabled}
                 />
+                {isQuantityDisabled && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Le stock total est calculé automatiquement à partir des tailles
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -414,7 +454,7 @@ const ProductModalContent = ({
                         <Input
                           type="number"
                           value={formData[size]}
-                          onChange={(e) => updateFormData(size, e.target.value)}
+                          onChange={(e) => handleSizeChange(size, e.target.value)}
                           className="h-9 text-center text-sm border-gray-300 focus:border-black focus:ring-black"
                           placeholder="0"
                           min="0"
@@ -437,7 +477,7 @@ const ProductModalContent = ({
                         <Input
                           type="number"
                           value={formData[size]}
-                          onChange={(e) => updateFormData(size, e.target.value)}
+                          onChange={(e) => handleSizeChange(size, e.target.value)}
                           className="h-9 text-center text-sm border-gray-300 focus:border-black focus:ring-black"
                           placeholder="0"
                           min="0"
@@ -447,6 +487,15 @@ const ProductModalContent = ({
                   </div>
                 </div>
               )}
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Stock Total Calculé:</strong> {calculateTotalQuantity(formData)} unité(s)
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Le stock total est automatiquement calculé en additionnant toutes les tailles
+                </p>
+              </div>
             </div>
           )}
 
