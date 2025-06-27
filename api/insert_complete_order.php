@@ -75,6 +75,68 @@ function sendConfirmationEmail($orderData, $orderNumber, $language = 'fr') {
     }
 }
 
+// Function to update product inventory
+function updateProductInventory($db, $productId, $size, $quantity) {
+    try {
+        error_log("Updating inventory for product ID: $productId, size: $size, quantity: $quantity");
+        
+        if ($productId && $size) {
+            // For products with specific sizes
+            $sizeColumn = '';
+            switch(strtolower($size)) {
+                case 'xs': $sizeColumn = 'xs_size'; break;
+                case 's': $sizeColumn = 's_size'; break;
+                case 'm': $sizeColumn = 'm_size'; break;
+                case 'l': $sizeColumn = 'l_size'; break;
+                case 'xl': $sizeColumn = 'xl_size'; break;
+                case 'xxl': $sizeColumn = 'xxl_size'; break;
+                case '3xl': $sizeColumn = '3xl_size'; break;
+                case '4xl': $sizeColumn = '4xl_size'; break;
+                case '48': $sizeColumn = '48_size'; break;
+                case '50': $sizeColumn = '50_size'; break;
+                case '52': $sizeColumn = '52_size'; break;
+                case '54': $sizeColumn = '54_size'; break;
+                case '56': $sizeColumn = '56_size'; break;
+                case '58': $sizeColumn = '58_size'; break;
+                default:
+                    error_log("Unknown size: $size");
+                    return false;
+            }
+            
+            // Update specific size quantity
+            $updateQuery = "UPDATE products SET $sizeColumn = GREATEST(0, $sizeColumn - :quantity) WHERE id_product = :product_id";
+            $updateStmt = $db->prepare($updateQuery);
+            $updateStmt->bindParam(':quantity', $quantity, PDO::PARAM_INT);
+            $updateStmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
+            
+            if (!$updateStmt->execute()) {
+                error_log("Failed to update size-specific inventory");
+                return false;
+            }
+            
+            error_log("Updated $sizeColumn for product $productId, reduced by $quantity");
+        } else if ($productId) {
+            // For products with general quantity only
+            $updateQuery = "UPDATE products SET qnty_product = GREATEST(0, qnty_product - :quantity) WHERE id_product = :product_id";
+            $updateStmt = $db->prepare($updateQuery);
+            $updateStmt->bindParam(':quantity', $quantity, PDO::PARAM_INT);
+            $updateStmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
+            
+            if (!$updateStmt->execute()) {
+                error_log("Failed to update general inventory");
+                return false;
+            }
+            
+            error_log("Updated general quantity for product $productId, reduced by $quantity");
+        }
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Error updating inventory: " . $e->getMessage());
+        return false;
+    }
+}
+
 try {
     error_log("=== SCRIPT START ===");
     error_log("PHP Version: " . phpversion());
@@ -283,7 +345,6 @@ try {
     $db->beginTransaction();
     
     try {
-        // Check if customer exists by email
         error_log("Checking if customer exists with email: " . $customer['email']);
         $checkCustomerQuery = "SELECT id_customer FROM customers WHERE email_customer = :email";
         $checkCustomerStmt = $db->prepare($checkCustomerQuery);
@@ -366,7 +427,6 @@ try {
             error_log("Created new customer with ID: " . $customerId);
         }
         
-        // Generate unique order number with better entropy
         $timestamp = time();
         $microseconds = microtime(true);
         $randomSuffix = mt_rand(1000, 9999);
@@ -401,7 +461,6 @@ try {
         
         error_log("Generated unique order number: " . $orderNumber);
         
-        // Extract order data with defaults
         $sousTotal = isset($orderData['sous_total']) ? floatval($orderData['sous_total']) : 0;
         $discountAmount = isset($orderData['discount_amount']) ? floatval($orderData['discount_amount']) : 0;
         $discountPercentage = isset($orderData['discount_percentage']) ? floatval($orderData['discount_percentage']) : 0;
@@ -490,7 +549,7 @@ try {
         $orderId = $db->lastInsertId();
         error_log("Created order with ID: " . $orderId);
         
-        // Insert order items
+        // Insert order items and update inventory
         error_log("Inserting " . count($orderData['items']) . " order items");
         foreach ($orderData['items'] as $index => $item) {
             if (!isset($item['nom_product']) || !isset($item['price']) || !isset($item['quantity'])) {
@@ -555,9 +614,18 @@ try {
                 error_log("Failed to insert order item $index. Error info: " . json_encode($errorInfo));
                 throw new Exception("Failed to insert order item $index: " . implode(', ', $errorInfo));
             }
+            
+            // UPDATE INVENTORY - New functionality
+            if ($productId) {
+                error_log("=== UPDATING INVENTORY ===");
+                $inventoryUpdated = updateProductInventory($db, $productId, $size, $quantity);
+                if (!$inventoryUpdated) {
+                    error_log("Warning: Failed to update inventory for product $productId");
+                    // Don't throw exception, just log warning as inventory update is not critical for order creation
+                }
+            }
         }
         
-        // Insert delivery address if different from customer address
         if (isset($orderData['delivery_address'])) {
             error_log("Inserting delivery address");
             $delivery = $orderData['delivery_address'];
@@ -609,7 +677,6 @@ try {
         error_log("=== COMMITTING TRANSACTION ===");
         $db->commit();
         
-        // Save successful order to fallback file
         $successData = $input;
         $successData['generated_order_id'] = $orderId;
         $successData['generated_order_number'] = $orderNumber;
