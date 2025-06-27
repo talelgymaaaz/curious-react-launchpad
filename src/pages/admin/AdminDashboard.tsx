@@ -138,11 +138,29 @@ const AdminDashboard = () => {
       case 'mobile':
         return <Smartphone className="h-4 w-4" />;
       case 'tablet':
+      case 'tablette':
         return <Tablet className="h-4 w-4" />;
       default:
         return <Monitor className="h-4 w-4" />;
     }
   };
+
+  // Process device analytics data to ensure proper format with colors
+  const processedDeviceData = stats?.device_analytics?.map((item, index) => {
+    const colors = ['#1f2937', '#374151', '#6b7280', '#9ca3af'];
+    return {
+      name: item.device_type,
+      value: parseInt(item.visitors.toString()) || 0,
+      color: colors[index % colors.length],
+      percentage: 0 // Will be calculated below
+    };
+  }) || [];
+
+  // Calculate percentages for device data
+  const totalDeviceVisitors = processedDeviceData.reduce((sum, item) => sum + item.value, 0);
+  processedDeviceData.forEach(item => {
+    item.percentage = totalDeviceVisitors > 0 ? Math.round((item.value / totalDeviceVisitors) * 100) : 0;
+  });
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00'];
 
@@ -295,11 +313,32 @@ const AdminDashboard = () => {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={stats?.visitor_growth || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="visitors" stroke="#212937" activeDot={{ r: 6 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12 }}
+                      stroke="#666"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#666"
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="visitors" 
+                      stroke="#212937" 
+                      strokeWidth={2}
+                      activeDot={{ r: 6, fill: '#212937' }}
+                      dot={{ fill: '#212937', r: 4 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -319,17 +358,38 @@ const AdminDashboard = () => {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={stats?.revenue_growth || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="revenue" stroke="#22c55e" activeDot={{ r: 6 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12 }}
+                      stroke="#666"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#666"
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="#22c55e" 
+                      strokeWidth={2}
+                      activeDot={{ r: 6, fill: '#22c55e' }}
+                      dot={{ fill: '#22c55e', r: 4 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            {/* Device Analytics */}
+            {/* Device Analytics - Enhanced */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -344,22 +404,33 @@ const AdminDashboard = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={stats?.device_analytics || []}
+                      data={processedDeviceData}
+                      dataKey="value"
+                      nameKey="name"
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ device_type, percent }) => `${device_type} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
+                      outerRadius={100}
+                      innerRadius={40}
                       fill="#8884d8"
-                      dataKey="visitors"
+                      label={({ name, percentage }) => `${name}: ${percentage}%`}
+                      labelLine={false}
                     >
-                      {(stats?.device_analytics || []).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      {processedDeviceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(value) => [`${value}`, 'Visiteurs']} />
                   </PieChart>
                 </ResponsiveContainer>
+                <div className="flex flex-wrap justify-center mt-4 gap-4">
+                  {processedDeviceData.map((item, index) => (
+                    <div key={index} className="flex items-center">
+                      {getDeviceIcon(item.name)}
+                      <span className="text-sm font-medium ml-2">{item.name}</span>
+                      <span className="text-sm text-gray-500 ml-1">({item.percentage}%)</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
@@ -377,10 +448,24 @@ const AdminDashboard = () => {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={stats?.top_countries || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="country" />
-                    <YAxis />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="country" 
+                      tick={{ fontSize: 12 }}
+                      stroke="#666"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#666"
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
                     <Bar dataKey="visitors" fill="#212937" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -431,7 +516,7 @@ const AdminDashboard = () => {
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </div>
         </div>
       </div>
     </AdminLayout>
