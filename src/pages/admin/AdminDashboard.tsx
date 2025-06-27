@@ -145,22 +145,35 @@ const AdminDashboard = () => {
     }
   };
 
-  // Process device analytics data to ensure proper format with colors
-  const processedDeviceData = stats?.device_analytics?.map((item, index) => {
-    const colors = ['#1f2937', '#374151', '#6b7280', '#9ca3af'];
-    return {
-      name: item.device_type,
-      value: parseInt(item.visitors.toString()) || 0,
-      color: colors[index % colors.length],
-      percentage: 0 // Will be calculated below
-    };
-  }) || [];
+  // Process device analytics data with enhanced handling
+  const processedDeviceData = (() => {
+    console.log('Raw device analytics data:', stats?.device_analytics);
+    
+    if (!stats?.device_analytics || !Array.isArray(stats.device_analytics)) {
+      console.log('No device analytics data available');
+      return [];
+    }
 
-  // Calculate percentages for device data
-  const totalDeviceVisitors = processedDeviceData.reduce((sum, item) => sum + item.value, 0);
-  processedDeviceData.forEach(item => {
-    item.percentage = totalDeviceVisitors > 0 ? Math.round((item.value / totalDeviceVisitors) * 100) : 0;
-  });
+    const colors = ['#1f2937', '#374151', '#6b7280', '#9ca3af'];
+    const processed = stats.device_analytics.map((item, index) => {
+      const visitors = typeof item.visitors === 'string' ? parseInt(item.visitors) : item.visitors;
+      return {
+        name: item.device_type || 'Unknown',
+        value: visitors || 0,
+        color: colors[index % colors.length],
+        percentage: 0
+      };
+    });
+
+    // Calculate percentages
+    const totalDeviceVisitors = processed.reduce((sum, item) => sum + item.value, 0);
+    processed.forEach(item => {
+      item.percentage = totalDeviceVisitors > 0 ? Math.round((item.value / totalDeviceVisitors) * 100) : 0;
+    });
+
+    console.log('Processed device data:', processed);
+    return processed;
+  })();
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00'];
 
@@ -401,36 +414,47 @@ const AdminDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={processedDeviceData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      innerRadius={40}
-                      fill="#8884d8"
-                      label={({ name, percentage }) => `${name}: ${percentage}%`}
-                      labelLine={false}
-                    >
-                      {processedDeviceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                {processedDeviceData.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={processedDeviceData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          innerRadius={40}
+                          fill="#8884d8"
+                          label={({ name, percentage }) => `${name}: ${percentage}%`}
+                          labelLine={false}
+                        >
+                          {processedDeviceData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`${value}`, 'Visiteurs']} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-wrap justify-center mt-4 gap-4">
+                      {processedDeviceData.map((item, index) => (
+                        <div key={index} className="flex items-center">
+                          {getDeviceIcon(item.name)}
+                          <span className="text-sm font-medium ml-2">{item.name}</span>
+                          <span className="text-sm text-gray-500 ml-1">({item.percentage}%)</span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value}`, 'Visiteurs']} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-wrap justify-center mt-4 gap-4">
-                  {processedDeviceData.map((item, index) => (
-                    <div key={index} className="flex items-center">
-                      {getDeviceIcon(item.name)}
-                      <span className="text-sm font-medium ml-2">{item.name}</span>
-                      <span className="text-sm text-gray-500 ml-1">({item.percentage}%)</span>
                     </div>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-[300px] text-gray-500">
+                    <div className="text-center">
+                      <Smartphone className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>Aucune donnée d'appareil disponible</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -516,7 +540,7 @@ const AdminDashboard = () => {
                 ))}
               </div>
             </CardContent>
-          </div>
+          </Card>
         </div>
       </div>
     </AdminLayout>
