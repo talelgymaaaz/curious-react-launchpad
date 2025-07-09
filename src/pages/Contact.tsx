@@ -1,14 +1,17 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, MapPin, Clock, Phone, Mail, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import Layout from '@/components/layout/Layout';
+import CustomMap from '@/components/contact/CustomMap';
 
 const Contact = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { t } = useTranslation('contact');
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -25,21 +28,21 @@ const Contact = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Le nom est requis';
+      newErrors.name = t('nameRequired');
     }
     if (!formData.email.trim()) {
-      newErrors.email = 'L\'email est requis';
+      newErrors.email = t('emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email invalide';
+      newErrors.email = t('emailInvalid');
     }
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Le téléphone est requis';
+      newErrors.phone = t('phoneRequired');
     }
     if (!formData.subject.trim()) {
-      newErrors.subject = 'Le sujet est requis';
+      newErrors.subject = t('subjectRequired');
     }
     if (!formData.message.trim()) {
-      newErrors.message = 'Le message est requis';
+      newErrors.message = t('messageRequired');
     }
 
     setErrors(newErrors);
@@ -51,8 +54,8 @@ const Contact = () => {
     
     if (!validateForm()) {
       toast({
-        title: 'Erreur',
-        description: 'Veuillez corriger les erreurs dans le formulaire',
+        title: t('error'),
+        description: t('errorMessage'),
         variant: "destructive",
       });
       return;
@@ -79,8 +82,8 @@ const Contact = () => {
 
       if (result.success) {
         toast({
-          title: 'Message envoyé',
-          description: 'Votre message a été envoyé avec succès. Nous vous répondrons bientôt.',
+          title: t('success'),
+          description: t('successMessage'),
         });
         // Reset form
         setFormData({
@@ -97,8 +100,8 @@ const Contact = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de l\'envoi du message',
+        title: t('error'),
+        description: t('errorMessage'),
         variant: "destructive",
       });
     } finally {
@@ -115,204 +118,148 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-4 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/')}
-            className="text-white hover:bg-white/20 rounded-full h-10 w-10 p-0"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-2xl font-serif font-semibold">Contactez-nous</h1>
-          <div className="w-10"></div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
-        {/* Desktop Layout */}
-        <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
-          {/* Contact Form - More width, less height */}
-          <div className="bg-black/40 backdrop-blur-xl border border-gray-700 rounded-2xl p-6 md:p-8 mb-8 lg:mb-0">
-            <div className="mb-6">
-              <h2 className="text-2xl font-serif text-white mb-2">Envoyez-nous un message</h2>
-              <p className="text-slate-300">
-                Nous serions ravis de vous entendre. Envoyez-nous un message et nous vous répondrons dans les plus brefs délais.
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-serif font-light mb-6">
+                {t('title')}
+              </h1>
+              <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+                {t('subtitle')}
               </p>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Two columns for name and email on desktop */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Nom complet *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none transition-colors"
-                    placeholder="Votre nom complet"
-                  />
-                  {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none transition-colors"
-                    placeholder="votre@email.com"
-                  />
-                  {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-                </div>
-              </div>
-
-              {/* Two columns for phone and subject */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Téléphone *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none transition-colors"
-                    placeholder="+33 1 23 45 67 89"
-                  />
-                  {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Sujet *
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none transition-colors"
-                    placeholder="Sujet de votre message"
-                  />
-                  {errors.subject && <p className="text-red-400 text-sm mt-1">{errors.subject}</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Message *
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none transition-colors resize-none"
-                  placeholder="Décrivez votre demande en détail..."
-                />
-                {errors.message && <p className="text-red-400 text-sm mt-1">{errors.message}</p>}
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium text-lg disabled:opacity-50 transition-all duration-200"
-              >
-                {isSubmitting ? (
-                  'Envoi en cours...'
-                ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Envoyer le message
-                  </>
-                )}
-              </Button>
-            </form>
           </div>
+        </div>
 
-          {/* Map and Info Section */}
-          <div className="space-y-6">
-            {/* Map */}
-            <div className="bg-black/40 backdrop-blur-xl border border-gray-700 rounded-2xl overflow-hidden">
-              <div className="p-4 bg-gradient-to-r from-blue-900/50 to-blue-800/50">
-                <h3 className="text-lg font-semibold text-white flex items-center">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  Notre Boutique
-                </h3>
-              </div>
-              <div className="aspect-video">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!4v1705234567890!6m8!1m7!1sCAoSLEFGMVFpcE1tZWJGdlJGdlJGdlJGdlJGdlJGdlJGdlJGdlJGdlJGdlJGdlI!2m2!1d36.8454422!2d10.2806219!3f90!4f0!5f0.7820865974627469"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-full"
-                />
-              </div>
+        {/* Form and Map Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+            {/* Contact Form */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12 flex flex-col">
+              <h2 className="text-3xl font-serif font-light mb-8 text-gray-900">
+                {t('getInTouch')}
+              </h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-6 flex-1">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="name" className="text-sm font-medium text-gray-900 mb-2 block">
+                      {t('name')} *
+                    </Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                      placeholder={t('namePlaceholder')}
+                      disabled={isSubmitting}
+                    />
+                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-900 mb-2 block">
+                      {t('email')} *
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                      placeholder={t('emailPlaceholder')}
+                      disabled={isSubmitting}
+                    />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="phone" className="text-sm font-medium text-gray-900 mb-2 block">
+                      {t('phone')} *
+                    </Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                      placeholder={t('phonePlaceholder')}
+                      disabled={isSubmitting}
+                    />
+                    {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="subject" className="text-sm font-medium text-gray-900 mb-2 block">
+                      {t('subject')} *
+                    </Label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                      placeholder={t('subjectPlaceholder')}
+                      disabled={isSubmitting}
+                    />
+                    {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject}</p>}
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <Label htmlFor="message" className="text-sm font-medium text-gray-900 mb-2 block">
+                    {t('message')} *
+                  </Label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    rows={6}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent resize-none h-32"
+                    placeholder={t('messagePlaceholder')}
+                    disabled={isSubmitting}
+                  />
+                  {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 px-8 rounded-lg font-medium text-lg transition-colors disabled:opacity-50 mt-auto"
+                >
+                  {isSubmitting ? (
+                    t('submitting')
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 mr-2" />
+                      {t('submit')}
+                    </>
+                  )}
+                </Button>
+              </form>
             </div>
 
-            {/* Contact Info & Hours */}
-            <div className="bg-black/40 backdrop-blur-xl border border-gray-700 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <Clock className="w-5 h-5 mr-2" />
-                Informations & Horaires
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center text-slate-300">
-                  <Phone className="w-4 h-4 mr-3 text-blue-400" />
-                  <span>+216 71 123 456</span>
-                </div>
-                
-                <div className="flex items-center text-slate-300">
-                  <Mail className="w-4 h-4 mr-3 text-blue-400" />
-                  <span>contact@luccibyey.com</span>
-                </div>
-                
-                <div className="flex items-start text-slate-300">
-                  <MapPin className="w-4 h-4 mr-3 mt-1 text-blue-400" />
-                  <span>Avenue Habib Bourguiba, Tunis, Tunisie</span>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-600">
-                <h4 className="text-white font-medium mb-3">Horaires d'ouverture</h4>
-                <div className="space-y-2 text-sm text-slate-300">
-                  <div className="flex justify-between">
-                    <span>Lundi - Vendredi</span>
-                    <span>09:00 - 18:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Samedi</span>
-                    <span>09:00 - 17:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Dimanche</span>
-                    <span className="text-red-400">Fermé</span>
-                  </div>
-                </div>
+            {/* Custom Map */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+              <div className="flex-1">
+                <CustomMap />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
