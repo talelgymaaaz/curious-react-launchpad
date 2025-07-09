@@ -36,7 +36,7 @@ export const generateOrderReceiptPDF = (order: OrderDetails, language: 'fr' | 'e
       paymentMethod: 'Mode de paiement',
       notes: 'Notes',
       thank: 'Merci pour votre confiance !',
-      footer: 'LUCCI BY E.Y • Pour toute question : contact@luccibey.com • Tel: +33 (0)1 XX XX XX XX',
+      footer: 'LUCCI BY E.Y • Pour toute question : contact@luccibey.com • Tel: +216 55542230',
       signature: 'Signature électronique validée',
       warranty: 'Garantie 2 ans • Échange 30 jours • Livraison assurée'
     },
@@ -68,7 +68,7 @@ export const generateOrderReceiptPDF = (order: OrderDetails, language: 'fr' | 'e
       paymentMethod: 'Payment Method',
       notes: 'Notes',
       thank: 'Thank you for your trust!',
-      footer: 'LUCCI BY E.Y • For any questions: contact@luccibey.com • Tel: +33 (0)1 XX XX XX XX',
+      footer: 'LUCCI BY E.Y • For any questions: contact@luccibey.com • Tel: +216 55542230',
       signature: 'Electronic signature validated',
       warranty: '2-year warranty • 30-day exchange • Insured delivery'
     }
@@ -132,7 +132,7 @@ export const generateOrderReceiptPDF = (order: OrderDetails, language: 'fr' | 'e
   // Order details with professional spacing
   doc.text(`${t.orderNumber}:`, 25, yPosition + 8);
   doc.setFont('helvetica', 'normal');
-  doc.text('55542230', 85, yPosition + 8);
+  doc.text(order.numero_commande, 85, yPosition + 8);
   
   doc.setFont('helvetica', 'bold');
   doc.text(`${t.orderDate}:`, 25, yPosition + 22);
