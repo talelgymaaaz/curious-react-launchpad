@@ -138,8 +138,8 @@ const ProductDropdown = ({ isOpen, activeCategory, onClose }: ProductDropdownPro
         <img
           src="/lovable-uploads/187386b2-1a7f-4401-ab51-7965f2c25e8c.png"
           alt="Collection Sur Mesure"
-          className="w-full h-80 object-cover object-top rounded-lg transform -translate-y-2"
-          style={{ objectPosition: 'center top' }}
+          className="w-full h-80 object-cover rounded-lg transform -translate-y-2"
+          style={{ objectPosition: 'center 15%' }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg flex items-end p-8 pb-6">
           <div className="text-white">
