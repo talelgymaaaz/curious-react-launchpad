@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
@@ -84,7 +83,6 @@ const Layout = ({ children }: LayoutProps) => {
     navigate('/contact');
   };
 
-
   const handleNewsletterClose = () => {
     setIsNewsletterOpen(false);
     localStorage.setItem('hasSeenNewsletterModal', 'true');
@@ -99,15 +97,17 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Show different announcement bars based on page type */}
-      {!isAdminPage && isIndexPage && <AnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />}
-      {!isAdminPage && !isIndexPage && <PageAnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />}
-      
-      <Header 
-        onMenuClick={handleMenuClick} 
-        onContactOpen={handleContactOpen}
-        onBookingOpen={handleBookingOpen}
-      />
+      {/* Show different announcement bars based on page type - with no gap */}
+      <div className="relative">
+        {!isAdminPage && isIndexPage && <AnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />}
+        {!isAdminPage && !isIndexPage && <PageAnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />}
+        
+        <Header 
+          onMenuClick={handleMenuClick} 
+          onContactOpen={handleContactOpen}
+          onBookingOpen={handleBookingOpen}
+        />
+      </div>
       <MobileSidebar 
         isOpen={isMobileMenuOpen} 
         onClose={handleMenuClose}
@@ -117,7 +117,7 @@ const Layout = ({ children }: LayoutProps) => {
         onContactOpen={handleContactOpen}
       />
       {/* Adjust main padding based on page type - add announcement bar height for non-index pages */}
-      <main className={isIndexPage ? '' : 'pt-[172px]'}>{renderChildren()}</main>
+      <main className={isIndexPage ? '' : 'pt-[140px]'}>{renderChildren()}</main>
       <Footer />
       <StoreFinderModal isOpen={isStoreFinderOpen} onClose={handleStoreFinderClose} />
       <BookingModal isOpen={isBookingOpen} onClose={handleBookingClose} />
