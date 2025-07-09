@@ -178,8 +178,8 @@ const ProductDropdown = ({ isOpen, activeCategory, onClose }: ProductDropdownPro
         <img
           src="/lovable-uploads/49627e2d-81f4-410f-82e9-b2c89dfb56a7.png"
           alt="Prêt à Porter Collection"
-          className="w-full h-80 object-cover object-top rounded-lg transform -translate-y-2"
-          style={{ objectPosition: 'center top' }}
+          className="w-full h-80 object-cover rounded-lg transform -translate-y-2"
+          style={{ objectPosition: 'center 15%' }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg flex items-end p-8 pb-6">
           <div className="text-white">
