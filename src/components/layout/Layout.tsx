@@ -97,17 +97,39 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Show different announcement bars based on page type - with no gap */}
-      <div className="relative">
-        {!isAdminPage && isIndexPage && <AnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />}
-        {!isAdminPage && !isIndexPage && <PageAnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />}
-        
+      {/* Sticky container for index page - includes both announcement bar and header */}
+      {!isAdminPage && isIndexPage && (
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <AnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />
+          <Header 
+            onMenuClick={handleMenuClick} 
+            onContactOpen={handleContactOpen}
+            onBookingOpen={handleBookingOpen}
+          />
+        </div>
+      )}
+      
+      {/* Non-index pages - separate announcement bar and header */}
+      {!isAdminPage && !isIndexPage && (
+        <div className="relative">
+          <PageAnnouncementBar onStoreFinderOpen={handleStoreFinderOpen} />
+          <Header 
+            onMenuClick={handleMenuClick} 
+            onContactOpen={handleContactOpen}
+            onBookingOpen={handleBookingOpen}
+          />
+        </div>
+      )}
+      
+      {/* Admin pages - header only */}
+      {isAdminPage && (
         <Header 
           onMenuClick={handleMenuClick} 
           onContactOpen={handleContactOpen}
           onBookingOpen={handleBookingOpen}
         />
-      </div>
+      )}
+      
       <MobileSidebar 
         isOpen={isMobileMenuOpen} 
         onClose={handleMenuClose}
@@ -116,8 +138,8 @@ const Layout = ({ children }: LayoutProps) => {
         onWishlistOpen={handleWishlistOpen}
         onContactOpen={handleContactOpen}
       />
-      {/* Adjust main padding based on page type - add announcement bar height for non-index pages */}
-      <main className={isIndexPage ? '' : 'pt-[140px]'}>{renderChildren()}</main>
+      {/* Adjust main padding - index page needs top padding for sticky header */}
+      <main className={isIndexPage ? 'pt-[140px]' : 'pt-[140px]'}>{renderChildren()}</main>
       <Footer />
       <StoreFinderModal isOpen={isStoreFinderOpen} onClose={handleStoreFinderClose} />
       <BookingModal isOpen={isBookingOpen} onClose={handleBookingClose} />

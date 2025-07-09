@@ -231,10 +231,12 @@ const Header = ({ onMenuClick, onContactOpen, onBookingOpen }: HeaderProps) => {
   return (
     <>
       <div className="relative" onMouseLeave={handleMouseLeave}>
-        <header className={`fixed left-0 right-0 z-40 transition-all duration-300 ${
-          shouldUseTransparentHeader 
-            ? 'top-[42px] bg-transparent' 
-            : 'top-[42px] bg-white border-b border-gray-100 shadow-sm border-t-0'
+        <header className={`transition-all duration-300 ${
+          isIndexPage 
+            ? (shouldUseTransparentHeader 
+                ? 'bg-transparent' 
+                : 'bg-white border-b border-gray-100 shadow-sm')
+            : 'fixed left-0 right-0 top-[42px] z-40 bg-white border-b border-gray-100 shadow-sm border-t-0'
         }`}>
           {/* Main header */}
           <div className="px-4 md:px-6 py-4">
