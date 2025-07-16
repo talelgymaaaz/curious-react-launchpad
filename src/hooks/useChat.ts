@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id_message?: number;
@@ -15,9 +16,10 @@ interface ContactForm {
 }
 
 export const useChat = () => {
+  const { t } = useTranslation(['chat', 'assistant']);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { text: "Besoin d'aide ? Je suis là !", isUser: false }
+    { text: t('assistant:welcome'), isUser: false }
   ]);
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState<ContactForm>({
@@ -56,7 +58,7 @@ export const useChat = () => {
       if (savedSessionId) setSessionId(savedSessionId);
       if (savedMessages) {
         const parsedMessages = JSON.parse(savedMessages);
-        setMessages(parsedMessages.length > 0 ? parsedMessages : [{ text: "Besoin d'aide ? Je suis là !", isUser: false }]);
+        setMessages(parsedMessages.length > 0 ? parsedMessages : [{ text: t('assistant:welcome'), isUser: false }]);
       }
       if (savedContactForm) setContactForm(JSON.parse(savedContactForm));
       if (savedUserInfoCollected) setUserInfoCollected(JSON.parse(savedUserInfoCollected));
@@ -299,7 +301,7 @@ export const useChat = () => {
       setTimeout(() => {
         setShowContactForm(true);
         setMessages(prev => [...prev, {
-          text: "Pour mieux vous aider, pouvez-vous nous donner vos coordonnées ?",
+          text: t('chat:contactFormRequest'),
           isUser: false
         }]);
       }, 1000);
@@ -416,11 +418,11 @@ export const useChat = () => {
         
         setTimeout(() => {
           const statusMessage = isAgentOnline 
-            ? "Our agent is online, we will answer to you as soon as possible."
-            : `We have received your message. We are currently offline but we received your information and we will call you as soon as possible on your number ${contactForm.phone}.`;
+            ? t('chat:agentStatus.online')
+            : t('chat:agentStatus.offline', { phone: contactForm.phone });
             
           setMessages(prev => [...prev, {
-            text: `Thank you ${contactForm.name}! Your request has been submitted. ${statusMessage}`,
+            text: `${t('chat:contactFormThank', { name: contactForm.name })} ${statusMessage}`,
             isUser: false
           }]);
         }, 1000);
@@ -461,7 +463,7 @@ export const useChat = () => {
     localStorage.removeItem(STORAGE_KEYS.LAST_READ_MESSAGE_ID);
     
     setSessionId('');
-    setMessages([{ text: "Besoin d'aide ? Je suis là !", isUser: false }]);
+    setMessages([{ text: t('assistant:welcome'), isUser: false }]);
     setContactForm({ name: '', email: '', phone: '' });
     setUserInfoCollected(false);
     setUnreadCount(0);

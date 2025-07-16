@@ -4,6 +4,7 @@ import { ChatWindow } from '@/components/chat/ChatWindow';
 import { ChatButton } from '@/components/chat/ChatButton';
 import { useChat } from '@/hooks/useChat';
 import { useAgentStatus } from '@/hooks/useAgentStatus';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 interface FloatingAssistantProps {
@@ -13,6 +14,7 @@ interface FloatingAssistantProps {
 export const FloatingAssistant: React.FC<FloatingAssistantProps> = ({
   onClose
 }) => {
+  const { t } = useTranslation(['chat', 'assistant']);
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useIsMobile();
@@ -106,9 +108,9 @@ export const FloatingAssistant: React.FC<FloatingAssistantProps> = ({
                       <span className="text-sm font-medium">L</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-sm">Luxury Assistant</h3>
+                      <h3 className="font-semibold text-sm">{t('chat:assistantName')}</h3>
                       <p className="text-xs text-muted-foreground">
-                        {agentsOnline ? 'En ligne' : 'Hors ligne'}
+                        {agentsOnline ? t('chat:onlineNow') : t('chat:offline')}
                       </p>
                     </div>
                   </div>

@@ -23,7 +23,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ agentsOnline, onClose })
             {t('assistant:agentName')}
           </span>
           <span className="text-white/80 text-xs">
-            {agentsOnline ? t('chat:onlineNow') : 'Hors ligne'}
+            {agentsOnline ? t('chat:onlineNow') : t('chat:offline')}
           </span>
         </div>
       </div>

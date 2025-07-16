@@ -2,6 +2,7 @@
 {
   "assistantName": "Assistant Luxe",
   "onlineNow": "En ligne maintenant",
+  "offline": "Hors ligne",
   "greeting": "Bonjour ! Je suis votre assistant personnel de luxe. Comment puis-je vous aider aujourd'hui ? ✨",
   "writeMessage": "Écrivez votre message...",
   "typeMessage": "Tapez votre message...",

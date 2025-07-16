@@ -34,17 +34,17 @@ export const ChatButton: React.FC<ChatButtonProps> = ({
           isMobile ? "w-3 h-3" : "w-4 h-4",
           agentsOnline ? "bg-green-400 animate-pulse" : "bg-red-400"
         )} style={{
-          top: '-20%',
-          right: '-10%'
+          top: '-15%',
+          right: '-15%'
         }}></div>
         
-        {/* Unread message badge */}
+        {/* Unread message badge - positioned at top-left for better visibility */}
         {unreadCount > 0 && (
           <div className={cn(
-            "absolute bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold border-white animate-pulse",
+            "absolute bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold border-white animate-pulse z-10",
             isMobile 
-              ? "-top-1 -left-1 w-4 h-4 border" 
-              : "-top-2 -left-2 w-5 h-5 border-2"
+              ? "-top-2 -left-2 w-5 h-5 border-2" 
+              : "-top-3 -left-3 w-6 h-6 border-2"
           )}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </div>
