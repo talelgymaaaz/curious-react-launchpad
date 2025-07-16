@@ -30,6 +30,7 @@ interface ChatWindowProps {
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onContactFormChange: (field: keyof ContactFormData, value: string) => void;
   onContactSubmit: () => void;
+  isMobile?: boolean;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -43,8 +44,35 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   onKeyDown,
   onContactFormChange,
-  onContactSubmit
+  onContactSubmit,
+  isMobile = false
 }) => {
+  if (isMobile) {
+    return (
+      <div className="flex flex-col h-full bg-background">
+        <div className="flex-1 min-h-0 flex flex-col">
+          <ChatMessages messages={messages} isMobile={true} />
+          
+          {showContactForm && (
+            <ContactForm
+              formData={contactForm}
+              onFormChange={onContactFormChange}
+              onSubmit={onContactSubmit}
+            />
+          )}
+        </div>
+
+        <ChatInput
+          message={message}
+          onMessageChange={onMessageChange}
+          onSendMessage={onSendMessage}
+          onKeyDown={onKeyDown}
+          isMobile={true}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-card border border-border rounded-lg shadow-2xl overflow-hidden backdrop-blur-sm">
       <ChatHeader agentsOnline={agentsOnline} onClose={onClose} />

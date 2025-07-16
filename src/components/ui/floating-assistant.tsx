@@ -4,6 +4,7 @@ import { ChatWindow } from '@/components/chat/ChatWindow';
 import { ChatButton } from '@/components/chat/ChatButton';
 import { useChat } from '@/hooks/useChat';
 import { useAgentStatus } from '@/hooks/useAgentStatus';
+import { X } from 'lucide-react';
 
 interface FloatingAssistantProps {
   onClose?: () => void;
@@ -81,32 +82,65 @@ export const FloatingAssistant: React.FC<FloatingAssistantProps> = ({
       )}
 
       {isMobile && (
-        <div className="fixed bottom-4 right-4 z-50">
-          {isOpen ? (
-            <div className="w-[calc(100vw-2rem)] max-w-sm max-h-[70vh]">
-              <ChatWindow
-                messages={messages}
-                message={message}
-                showContactForm={showContactForm}
-                contactForm={contactForm}
+        <>
+          {/* Mobile Chat Button */}
+          {!isOpen && (
+            <div className="fixed bottom-4 right-4 z-50">
+              <ChatButton
                 agentsOnline={agentsOnline}
-                onClose={() => setIsOpen(false)}
-                onMessageChange={handleMessageChange}
-                onSendMessage={handleSendMessage}
-                onKeyDown={handleKeyPress}
-                onContactFormChange={handleContactFormChange}
-                onContactSubmit={handleContactSubmit}
+                unreadCount={unreadCount}
+                onClick={() => setIsOpen(true)}
+                isMobile={true}
               />
             </div>
-          ) : (
-            <ChatButton
-              agentsOnline={agentsOnline}
-              unreadCount={unreadCount}
-              onClick={() => setIsOpen(true)}
-              isMobile={true}
-            />
           )}
-        </div>
+          
+          {/* Mobile Full-Screen Chat Modal */}
+          {isOpen && (
+            <div className="fixed inset-0 z-[9999] bg-background/95 backdrop-blur-sm">
+              <div className="flex flex-col h-full">
+                {/* Mobile Header */}
+                <div className="flex items-center justify-between p-4 border-b border-border bg-card/80 backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent via-primary to-accent text-white flex items-center justify-center">
+                      <span className="text-sm font-medium">L</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm">Luxury Assistant</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {agentsOnline ? 'En ligne' : 'Hors ligne'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                {/* Mobile Chat Content */}
+                <div className="flex-1 min-h-0">
+                  <ChatWindow
+                    messages={messages}
+                    message={message}
+                    showContactForm={showContactForm}
+                    contactForm={contactForm}
+                    agentsOnline={agentsOnline}
+                    onClose={() => setIsOpen(false)}
+                    onMessageChange={handleMessageChange}
+                    onSendMessage={handleSendMessage}
+                    onKeyDown={handleKeyPress}
+                    onContactFormChange={handleContactFormChange}
+                    onContactSubmit={handleContactSubmit}
+                    isMobile={true}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </>
   );

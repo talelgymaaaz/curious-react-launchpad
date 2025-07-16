@@ -13,9 +13,10 @@ interface Message {
 
 interface ChatMessagesProps {
   messages: Message[];
+  isMobile?: boolean;
 }
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isMobile = false }) => {
   const { t } = useTranslation('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -25,7 +26,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
   }, [messages]);
 
   return (
-    <div className="h-48 sm:h-64 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-background to-muted/30">
+    <div className={`${isMobile ? 'flex-1 min-h-0' : 'h-48 sm:h-64'} overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-background to-muted/30`}>
       {messages.length === 0 && (
         <div className="flex gap-2 sm:gap-3 items-start animate-fade-in">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 bg-gradient-to-br from-accent via-primary to-accent text-white border-white/30">

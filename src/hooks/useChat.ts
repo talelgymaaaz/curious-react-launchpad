@@ -30,8 +30,95 @@ export const useChat = () => {
   const [isPollingMessages, setIsPollingMessages] = useState(false);
   const [tempSessionId, setTempSessionId] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [lastReadMessageId, setLastReadMessageId] = useState<number>(0);
   const messagePollingRef = useRef<NodeJS.Timeout | null>(null);
   
+  // localStorage keys
+  const STORAGE_KEYS = {
+    SESSION_ID: 'chat_session_id',
+    MESSAGES: 'chat_messages',
+    CONTACT_FORM: 'chat_contact_form',
+    USER_INFO_COLLECTED: 'chat_user_info_collected',
+    UNREAD_COUNT: 'chat_unread_count',
+    LAST_READ_MESSAGE_ID: 'chat_last_read_message_id'
+  };
+
+  // Load chat state from localStorage
+  useEffect(() => {
+    try {
+      const savedSessionId = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
+      const savedMessages = localStorage.getItem(STORAGE_KEYS.MESSAGES);
+      const savedContactForm = localStorage.getItem(STORAGE_KEYS.CONTACT_FORM);
+      const savedUserInfoCollected = localStorage.getItem(STORAGE_KEYS.USER_INFO_COLLECTED);
+      const savedUnreadCount = localStorage.getItem(STORAGE_KEYS.UNREAD_COUNT);
+      const savedLastReadMessageId = localStorage.getItem(STORAGE_KEYS.LAST_READ_MESSAGE_ID);
+
+      if (savedSessionId) setSessionId(savedSessionId);
+      if (savedMessages) {
+        const parsedMessages = JSON.parse(savedMessages);
+        setMessages(parsedMessages.length > 0 ? parsedMessages : [{ text: "Besoin d'aide ? Je suis là !", isUser: false }]);
+      }
+      if (savedContactForm) setContactForm(JSON.parse(savedContactForm));
+      if (savedUserInfoCollected) setUserInfoCollected(JSON.parse(savedUserInfoCollected));
+      if (savedUnreadCount) setUnreadCount(parseInt(savedUnreadCount));
+      if (savedLastReadMessageId) setLastReadMessageId(parseInt(savedLastReadMessageId));
+    } catch (error) {
+      console.error('Error loading chat state from localStorage:', error);
+    }
+  }, []);
+
+  // Save chat state to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SESSION_ID, sessionId);
+  }, [sessionId]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CONTACT_FORM, JSON.stringify(contactForm));
+  }, [contactForm]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.USER_INFO_COLLECTED, JSON.stringify(userInfoCollected));
+  }, [userInfoCollected]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.UNREAD_COUNT, unreadCount.toString());
+  }, [unreadCount]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.LAST_READ_MESSAGE_ID, lastReadMessageId.toString());
+  }, [lastReadMessageId]);
+
+  // Request notification permission
+  const requestNotificationPermission = useCallback(async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      try {
+        await Notification.requestPermission();
+      } catch (error) {
+        console.log('Could not request notification permission:', error);
+      }
+    }
+  }, []);
+
+  // Show browser notification
+  const showNotification = useCallback((title: string, body: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(title, {
+          body,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          tag: 'chat-message'
+        });
+      } catch (error) {
+        console.log('Could not show notification:', error);
+      }
+    }
+  }, []);
+
   // Notification sound using Web Audio API
   const playNotificationSound = useCallback(() => {
     try {
@@ -53,12 +140,6 @@ export const useChat = () => {
     } catch (error) {
       console.log('Could not play notification sound:', error);
     }
-  }, []);
-
-  // Initialize temp session ID
-  useEffect(() => {
-    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setTempSessionId(tempId);
   }, []);
 
   // Store initial message before contact form
@@ -136,8 +217,18 @@ export const useChat = () => {
               
               if (newMessages.length === 0) return prev;
               
+              // Play sound and show notification for new messages
               playNotificationSound();
               setUnreadCount(prevCount => prevCount + newMessages.length);
+              
+              // Show browser notification for the latest message
+              if (newMessages.length > 0) {
+                const latestMessage = newMessages[newMessages.length - 1];
+                showNotification(
+                  'Nouveau message de Luxury Assistant',
+                  latestMessage.message_content.substring(0, 100) + (latestMessage.message_content.length > 100 ? '...' : '')
+                );
+              }
               
               const formattedMessages = newMessages.map((msg: any) => ({
                 id_message: msg.id_message,
@@ -163,7 +254,25 @@ export const useChat = () => {
     // Set up interval polling every 2 seconds (faster)
     messagePollingRef.current = setInterval(pollMessages, 2000);
     console.log('Message polling interval set up successfully');
-  }, [sessionId, isPollingMessages, playNotificationSound, stopMessagePolling]);
+  }, [sessionId, isPollingMessages, playNotificationSound, showNotification, stopMessagePolling]);
+
+  // Initialize temp session ID and request notification permission
+  useEffect(() => {
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setTempSessionId(tempId);
+    requestNotificationPermission();
+
+    // Start polling if we have a saved session
+    const savedSessionId = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
+    const savedUserInfoCollected = localStorage.getItem(STORAGE_KEYS.USER_INFO_COLLECTED);
+    
+    if (savedSessionId && savedUserInfoCollected === 'true') {
+      setTimeout(() => {
+        startMessagePolling(savedSessionId);
+      }, 2000);
+    }
+  }, [requestNotificationPermission, startMessagePolling]);
+
 
   // Handle message input change
   const handleMessageChange = useCallback((value: string) => {
@@ -328,10 +437,38 @@ export const useChat = () => {
     };
   }, [stopMessagePolling]);
 
-  // Clear unread count when opened
+  // Clear unread count when opened and mark messages as read
   const clearUnreadCount = useCallback(() => {
     setUnreadCount(0);
-  }, []);
+    
+    // Update last read message ID to the latest message
+    const latestMessageId = messages
+      .filter(msg => msg.id_message)
+      .reduce((maxId, msg) => Math.max(maxId, msg.id_message || 0), 0);
+    
+    if (latestMessageId > lastReadMessageId) {
+      setLastReadMessageId(latestMessageId);
+    }
+  }, [messages, lastReadMessageId]);
+
+  // Clear chat data
+  const clearChatData = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEYS.SESSION_ID);
+    localStorage.removeItem(STORAGE_KEYS.MESSAGES);
+    localStorage.removeItem(STORAGE_KEYS.CONTACT_FORM);
+    localStorage.removeItem(STORAGE_KEYS.USER_INFO_COLLECTED);
+    localStorage.removeItem(STORAGE_KEYS.UNREAD_COUNT);
+    localStorage.removeItem(STORAGE_KEYS.LAST_READ_MESSAGE_ID);
+    
+    setSessionId('');
+    setMessages([{ text: "Besoin d'aide ? Je suis là !", isUser: false }]);
+    setContactForm({ name: '', email: '', phone: '' });
+    setUserInfoCollected(false);
+    setUnreadCount(0);
+    setLastReadMessageId(0);
+    setShowContactForm(false);
+    stopMessagePolling();
+  }, [stopMessagePolling]);
 
   return {
     message,
@@ -341,11 +478,13 @@ export const useChat = () => {
     sessionId,
     userInfoCollected,
     unreadCount,
+    lastReadMessageId,
     handleMessageChange,
     handleContactFormChange,
     handleSendMessage,
     handleKeyPress,
     handleContactSubmit,
-    clearUnreadCount
+    clearUnreadCount,
+    clearChatData
   };
 };

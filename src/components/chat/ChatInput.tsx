@@ -9,6 +9,7 @@ interface ChatInputProps {
   onSendMessage: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   disabled?: boolean;
+  isMobile?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -16,12 +17,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onMessageChange,
   onSendMessage,
   onKeyDown,
-  disabled = false
+  disabled = false,
+  isMobile = false
 }) => {
   const { t } = useTranslation('chat');
   
   return (
-    <div className="p-3 sm:p-4 border-t border-border bg-card">
+    <div className={`${isMobile ? 'p-4 bg-card/80 backdrop-blur-sm' : 'p-3 sm:p-4 bg-card'} border-t border-border`}>
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="flex-1">
           <Input
